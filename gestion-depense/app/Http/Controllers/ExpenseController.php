@@ -10,15 +10,40 @@ use App\Models\Budget;
 class ExpenseController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $expenses = Expense::with('category')
-                    ->where('user_id', auth()->id())
-                    ->latest()
-                    ->get();
+        $userId = auth()->id();
+        
+        $selectedYear = $request->input('year', date('Y'));
+        $selectedMonth = $request->input('month', date('m'));
+        
+        if ($request->has('year') && !$request->filled('month')) {
+            $selectedMonth = null;
+        }
 
-        // ── Monthly totals (last 12 months) ──
-        $monthlyRaw = Expense::where('user_id', auth()->id())
+        // Base Query for Expenses
+        $query = Expense::with('category')->where('user_id', $userId);
+        
+        if ($selectedYear) {
+            $query->whereYear('expense_date', $selectedYear);
+        }
+        if ($selectedMonth) {
+            $query->whereMonth('expense_date', $selectedMonth);
+        }
+
+        $expenses = (clone $query)->latest()->get();
+
+        // ── Monthly totals (last 12 months from the selected date context or current) ──
+        // Only makes sense if "All months" is selected, otherwise it's just one month. Let's keep the logic but filter by year strictly if year is selected.
+        $monthlyQuery = Expense::where('user_id', $userId);
+        if ($selectedYear) {
+            $monthlyQuery->whereYear('expense_date', $selectedYear);
+        }
+        if ($selectedMonth) {
+            $monthlyQuery->whereMonth('expense_date', $selectedMonth);
+        }
+        
+        $monthlyRaw = $monthlyQuery
             ->selectRaw("DATE_FORMAT(expense_date, '%Y-%m') as month, SUM(amount) as total")
             ->groupBy('month')
             ->orderBy('month')
@@ -31,8 +56,7 @@ class ExpenseController extends Controller
         $monthlyTotals = $monthlyRaw->values();
 
         // ── Per-category totals ──
-        $categoryRaw = Expense::where('user_id', auth()->id())
-            ->with('category')
+        $categoryRaw = (clone $query)
             ->selectRaw('category_id, SUM(amount) as total')
             ->groupBy('category_id')
             ->orderByDesc('total')
@@ -50,20 +74,32 @@ class ExpenseController extends Controller
         $alertes = [];
 
         foreach ($categories as $category) {
-            $totalDepenses = Expense::where('user_id', auth()->id())
-                                ->where('category_id', $category->id)
-                                ->whereMonth('expense_date', date('m'))
-                                ->whereYear('expense_date', date('Y'))
-                                ->sum('amount');
+            $catExpQuery = Expense::where('user_id', $userId)
+                                ->where('category_id', $category->id);
+            $catBudgetQuery = Budget::where('user_id', $userId)
+                            ->where('category_id', $category->id);
 
-            $budget = Budget::where('user_id', auth()->id())
-                            ->where('category_id', $category->id)
-                            ->whereMonth('month', date('m'))
-                            ->whereYear('month', date('Y'))
-                            ->first();
+            if ($selectedYear) {
+                $catExpQuery->whereYear('expense_date', $selectedYear);
+                $catBudgetQuery->whereYear('month', $selectedYear);
+            }
+            if ($selectedMonth) {
+                $catExpQuery->whereMonth('expense_date', $selectedMonth);
+                $catBudgetQuery->whereMonth('month', $selectedMonth);
+            }
 
-            if ($budget && $totalDepenses > $budget->amount) {
-                $alertes[] = "Attention : Vous avez dépassé le budget de la catégorie '{$category->name}' !";
+            $totalDepenses = $catExpQuery->sum('amount');
+            
+            if ($selectedMonth) {
+                $budget = $catBudgetQuery->first();
+                $budgetAmount = $budget ? $budget->amount : 0;
+            } else {
+                $budgetAmount = $catBudgetQuery->sum('amount');
+            }
+
+            if ($budgetAmount > 0 && $totalDepenses > $budgetAmount) {
+                $period = $selectedMonth ? "du mois" : "de l'année";
+                $alertes[] = "Attention : Vous avez dépassé le budget {$period} de la catégorie '{$category->name}' !";
             }
         }
 
@@ -71,7 +107,9 @@ class ExpenseController extends Controller
             'expenses',
             'monthlyLabels', 'monthlyTotals',
             'categoryLabels', 'categoryTotals',
-            'alertes'
+            'alertes',
+            'selectedYear',
+            'selectedMonth'
         ));
     }
 

@@ -7,10 +7,29 @@ use App\Models\Revenue;
 
 class RevenueController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $revenues = Revenue::where('user_id', auth()->id())->latest()->get();
-        return view('revenues.index', compact('revenues'));
+        $userId = auth()->id();
+        
+        $selectedYear = $request->input('year', date('Y'));
+        $selectedMonth = $request->input('month', date('m'));
+        
+        if ($request->has('year') && !$request->filled('month')) {
+            $selectedMonth = null;
+        }
+
+        $query = Revenue::where('user_id', $userId);
+        
+        if ($selectedYear) {
+            $query->whereYear('revenue_date', $selectedYear);
+        }
+        if ($selectedMonth) {
+            $query->whereMonth('revenue_date', $selectedMonth);
+        }
+
+        $revenues = $query->latest()->get();
+
+        return view('revenues.index', compact('revenues', 'selectedYear', 'selectedMonth'));
     }
 
     public function create()

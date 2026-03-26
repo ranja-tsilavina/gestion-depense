@@ -12,59 +12,81 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $userId = Auth::id();
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
-
-        // 1. Total Stats (All time)
-        $totalExpenses = Expense::where('user_id', $userId)->sum('amount');
-        $totalRevenues = Revenue::where('user_id', $userId)->sum('amount');
-
-        // 2. Budget Alerts (Current month)
-        $categories = Category::all();
-        $alertes = [];
-
-        foreach ($categories as $category) {
-            $catExpenses = Expense::where('user_id', $userId)
-                ->where('category_id', $category->id)
-                ->whereMonth('expense_date', $currentMonth)
-                ->whereYear('expense_date', $currentYear)
-                ->sum('amount');
-
-            $budget = Budget::where('user_id', $userId)
-                ->where('category_id', $category->id)
-                ->whereMonth('month', $currentMonth)
-                ->whereYear('month', $currentYear)
-                ->first();
-
-            if ($budget && $catExpenses > $budget->amount) {
-                $alertes[] = "Attention : Vous avez dépassé le budget mensuel de la catégorie '{$category->name}' !";
-            }
+        
+        // Default to current month and year if no filters are applied, unless "all" or specific year is requested
+        // Actually, if they want "Year only", month will be empty.
+        // Let's set default: if no year is provided, default to current year.
+        // If no month is provided and no year is provided, default to current month.
+        $selectedYear = $request->input('year', Carbon::now()->year);
+        $selectedMonth = $request->input('month', Carbon::now()->month);
+        
+        // If user explicitly submitted the form and chose "Tous les mois" (empty value), $selectedMonth will be null.
+        if ($request->has('year') && !$request->filled('month')) {
+            $selectedMonth = null;
         }
 
-        // 3. Charts Data (Current month expenses vs budget)
+        // 1. Total Stats (Filtered)
+        $expensesQuery = Expense::where('user_id', $userId);
+        $revenuesQuery = Revenue::where('user_id', $userId);
+
+        if ($selectedYear) {
+            $expensesQuery->whereYear('expense_date', $selectedYear);
+            $revenuesQuery->whereYear('revenue_date', $selectedYear);
+        }
+        if ($selectedMonth) {
+            $expensesQuery->whereMonth('expense_date', $selectedMonth);
+            $revenuesQuery->whereMonth('revenue_date', $selectedMonth);
+        }
+
+        $totalExpenses = $expensesQuery->sum('amount');
+        $totalRevenues = $revenuesQuery->sum('amount');
+
+        // 2. Budget Alerts & 3. Charts Data
+        $categories = Category::all();
+        $alertes = [];
         $chartCategories = [];
         $chartExpenses = [];
         $chartBudgets = [];
 
         foreach ($categories as $category) {
-            $catExpenses = Expense::where('user_id', $userId)
-                ->where('category_id', $category->id)
-                ->whereMonth('expense_date', $currentMonth)
-                ->whereYear('expense_date', $currentYear)
-                ->sum('amount');
+            // Expenses for this category
+            $catExpQuery = Expense::where('user_id', $userId)
+                ->where('category_id', $category->id);
+            
+            // Budget for this category
+            $catBudgetQuery = Budget::where('user_id', $userId)
+                ->where('category_id', $category->id);
 
-            $budget = Budget::where('user_id', $userId)
-                ->where('category_id', $category->id)
-                ->whereMonth('month', $currentMonth)
-                ->whereYear('month', $currentYear)
-                ->first();
+            if ($selectedYear) {
+                $catExpQuery->whereYear('expense_date', $selectedYear);
+                $catBudgetQuery->whereYear('month', $selectedYear);
+            }
+            if ($selectedMonth) {
+                $catExpQuery->whereMonth('expense_date', $selectedMonth);
+                $catBudgetQuery->whereMonth('month', $selectedMonth);
+            }
 
-            $budgetAmount = $budget ? $budget->amount : 0;
+            $catExpenses = $catExpQuery->sum('amount');
+            
+            // If filtering by specific month, get that month's budget.
+            // If filtering by year, sum the budgets for all months in that year.
+            if ($selectedMonth) {
+                $budget = $catBudgetQuery->first();
+                $budgetAmount = $budget ? $budget->amount : 0;
+            } else {
+                $budgetAmount = $catBudgetQuery->sum('amount');
+            }
 
-            // Only include categories that have either an expense or a budget this month
+            // Alerts
+            if ($budgetAmount > 0 && $catExpenses > $budgetAmount) {
+                $period = $selectedMonth ? "du mois" : "de l'année";
+                $alertes[] = "Attention : Vous avez dépassé le budget {$period} de la catégorie '{$category->name}' !";
+            }
+
+            // Charts
             if ($catExpenses > 0 || $budgetAmount > 0) {
                 $chartCategories[] = $category->name;
                 $chartExpenses[] = $catExpenses;
@@ -78,7 +100,9 @@ class DashboardController extends Controller
             'alertes',
             'chartCategories',
             'chartExpenses',
-            'chartBudgets'
+            'chartBudgets',
+            'selectedYear',
+            'selectedMonth'
         ));
     }
 }

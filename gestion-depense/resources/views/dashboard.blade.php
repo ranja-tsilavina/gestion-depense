@@ -17,6 +17,44 @@
         </div>
     </div>
 
+    <!-- Filters -->
+    <div class="card card-custom mb-4 border-0 shadow-sm" style="border-radius:16px;">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ route('dashboard') }}" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" style="font-weight:600;font-size:0.85rem;color:#64748b">Année</label>
+                    <select name="year" class="form-select" style="border-radius:12px;cursor:pointer;border:1px solid #e2e8f0;padding:0.6rem 1rem">
+                        @php $currentYearForLoop = date('Y'); @endphp
+                        @for($i = $currentYearForLoop; $i >= $currentYearForLoop - 5; $i--)
+                            <option value="{{ $i }}" {{ (isset($selectedYear) && $selectedYear == $i) ? 'selected' : '' }}>{{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" style="font-weight:600;font-size:0.85rem;color:#64748b">Mois</label>
+                    <select name="month" class="form-select" style="border-radius:12px;cursor:pointer;border:1px solid #e2e8f0;padding:0.6rem 1rem">
+                        <option value="">-- Toute l'année --</option>
+                        @php
+                            $months = [
+                                1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
+                                5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
+                                9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
+                            ];
+                        @endphp
+                        @foreach($months as $num => $name)
+                            <option value="{{ $num }}" {{ (isset($selectedMonth) && $selectedMonth == $num) ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn w-100" style="background:var(--primary);color:white;font-weight:600;border-radius:12px;padding:0.6rem 1rem;box-shadow:0 4px 12px rgba(79,70,229,0.2)">
+                        <i class="bi bi-funnel-fill me-2"></i>Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Budget Alerts -->
     @if(!empty($alertes) && count($alertes) > 0)
         @foreach($alertes as $alerte)

@@ -17,6 +17,13 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="alert alert-danger alert-custom alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row g-4">
 
         <!-- ── Add Category Form ── -->
@@ -79,11 +86,18 @@
                     @else
                         <ul class="category-list">
                             @foreach($categories as $index => $category)
-                                <li>
-                                    <span class="category-pill">
+                                <li class="d-flex justify-content-between align-items-center" style="background:var(--light);padding:0.5rem;border-radius:12px;border:1px solid rgba(0,0,0,0.03);">
+                                    <span class="category-pill mb-0" style="background:transparent;border:none;padding:0">
                                         <span class="category-num">{{ $index + 1 }}</span>
                                         {{ $category->name }}
                                     </span>
+                                    <form method="POST" action="/categories/{{ $category->id }}" class="m-0" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:8px;padding:0.25rem 0.5rem" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
                                 </li>
                             @endforeach
                         </ul>
