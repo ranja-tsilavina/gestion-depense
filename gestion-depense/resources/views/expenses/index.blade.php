@@ -21,25 +21,37 @@
     <!-- ── Filters ── -->
     <div class="card card-custom mb-4 border-0 shadow-sm" style="border-radius:16px;">
         <div class="card-body p-4">
-            <form method="GET" action="{{ route('expenses.index') }}" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label" style="font-weight:600;font-size:0.85rem;color:#64748b">Année</label>
-                    <select name="year" class="form-select" style="border-radius:12px;cursor:pointer;border:1px solid #e2e8f0;padding:0.6rem 1rem">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <h5 class="text-secondary mb-0" style="font-size:1rem;font-weight:600"><i class="bi bi-funnel-fill me-2"></i>Recherche avancée</h5>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('expenses.export.pdf', request()->query()) }}" class="btn btn-sm" style="background:#fef2f2;color:#ef4444;border:1px solid #fecaca;border-radius:8px;font-weight:600" title="Exporter en PDF">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+                    </a>
+                    <a href="{{ route('expenses.export.excel', request()->query()) }}" class="btn btn-sm" style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:8px;font-weight:600" title="Exporter en Excel">
+                        <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
+                    </a>
+                </div>
+            </div>
+            <form method="GET" action="{{ route('expenses.index') }}" class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label" style="font-weight:600;font-size:0.75rem;color:#64748b;text-transform:uppercase">Année</label>
+                    <select name="year" class="form-select" style="border-radius:10px;border:1px solid #e2e8f0">
+                        <option value="">Toutes</option>
                         @php $currentYearForLoop = date('Y'); @endphp
                         @for($i = $currentYearForLoop; $i >= $currentYearForLoop - 5; $i--)
-                            <option value="{{ $i }}" {{ (isset($selectedYear) && $selectedYear == $i) ? 'selected' : '' }}>{{ $i }}</option>
+                            <option value="{{ $i }}" {{ (isset($selectedYear) && $selectedYear != '' && $selectedYear == $i) ? 'selected' : '' }}>{{ $i }}</option>
                         @endfor
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label" style="font-weight:600;font-size:0.85rem;color:#64748b">Mois</label>
-                    <select name="month" class="form-select" style="border-radius:12px;cursor:pointer;border:1px solid #e2e8f0;padding:0.6rem 1rem">
-                        <option value="">-- Toute l'année --</option>
+                <div class="col-md-2">
+                    <label class="form-label" style="font-weight:600;font-size:0.75rem;color:#64748b;text-transform:uppercase">Mois</label>
+                    <select name="month" class="form-select" style="border-radius:10px;border:1px solid #e2e8f0">
+                        <option value="">Tous</option>
                         @php
                             $months = [
-                                1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
-                                5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
-                                9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
+                                1 => 'Jan', 2 => 'Fév', 3 => 'Mar', 4 => 'Avr',
+                                5 => 'Mai', 6 => 'Jun', 7 => 'Jul', 8 => 'Aoû',
+                                9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Déc'
                             ];
                         @endphp
                         @foreach($months as $num => $name)
@@ -48,9 +60,36 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <button type="submit" class="btn w-100" style="background:var(--primary);color:white;font-weight:600;border-radius:12px;padding:0.6rem 1rem;box-shadow:0 4px 12px rgba(79,70,229,0.2)">
-                        <i class="bi bi-funnel-fill me-2"></i>Filtrer
-                    </button>
+                    <label class="form-label" style="font-weight:600;font-size:0.75rem;color:#64748b;text-transform:uppercase">Catégorie</label>
+                    <select name="category_id" class="form-select" style="border-radius:10px;border:1px solid #e2e8f0">
+                        <option value="">-- Toutes --</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}" {{ (isset($categoryId) && $categoryId == $cat->id) ? 'selected' : '' }}>{{ $cat->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" style="font-weight:600;font-size:0.75rem;color:#64748b;text-transform:uppercase">Min (Ar)</label>
+                    <input type="number" name="min_amount" class="form-control" style="border-radius:10px;border:1px solid #e2e8f0" placeholder="0" value="{{ $minAmount ?? '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" style="font-weight:600;font-size:0.75rem;color:#64748b;text-transform:uppercase">Max (Ar)</label>
+                    <input type="number" name="max_amount" class="form-control" style="border-radius:10px;border:1px solid #e2e8f0" placeholder="∞" value="{{ $maxAmount ?? '' }}">
+                </div>
+                
+                <div class="col-md-8 mt-4">
+                    <label class="form-label" style="font-weight:600;font-size:0.75rem;color:#64748b;text-transform:uppercase">Mot-clé (Description)</label>
+                    <input type="text" name="keyword" class="form-control" style="border-radius:10px;border:1px solid #e2e8f0" placeholder="Rechercher une dépense..." value="{{ $keyword ?? '' }}">
+                </div>
+                <div class="col-md-4 mt-4 d-flex align-items-end">
+                    <div class="d-flex w-100 gap-2">
+                        <button type="submit" class="btn flex-grow-1" style="background:var(--primary);color:white;font-weight:600;border-radius:10px;box-shadow:0 4px 12px rgba(79,70,229,0.2)">
+                            <i class="bi bi-search me-2"></i>Rechercher
+                        </button>
+                        <a href="{{ route('expenses.index') }}" class="btn btn-light" style="border-radius:10px; border:1px solid #e2e8f0" title="Réinitialiser">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </a>
+                    </div>
                 </div>
             </form>
         </div>
@@ -172,40 +211,7 @@
 
     </div>
 
-    <!-- ── Filter / Search Bar ── -->
-    <div class="filter-bar mb-3">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-5">
-                <label class="form-label fw-semibold" style="font-size:.8rem;color:#475569">
-                    <i class="bi bi-search me-1"></i>Rechercher
-                </label>
-                <input
-                    type="text"
-                    id="searchInput"
-                    class="form-control"
-                    placeholder="Description, catégorie…"
-                    oninput="filterTable()"
-                >
-            </div>
-            <div class="col-md-4">
-                <label class="form-label fw-semibold" style="font-size:.8rem;color:#475569">
-                    <i class="bi bi-tag me-1"></i>Catégorie
-                </label>
-                <select id="categoryFilter" class="form-select" onchange="filterTable()">
-                    <option value="">Toutes les catégories</option>
-                    @foreach($expenses->pluck('category.name')->unique()->filter() as $cat)
-                        <option value="{{ $cat }}">{{ $cat }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
-                <button class="btn w-100" onclick="clearFilters()"
-                    style="border:1.5px solid #e2e8f0;border-radius:10px;font-size:.875rem;padding:.55rem;font-weight:500;color:#64748b">
-                    <i class="bi bi-x-circle me-1"></i>Réinitialiser
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Removed Old Search Bar -->
 
     <!-- ── Expenses Table ── -->
     <div class="table-card">
@@ -442,35 +448,9 @@
         });
     }
 
-    // ── Search + filter ──
-    function filterTable() {
-        const search = document.getElementById('searchInput').value.toLowerCase();
-        const cat    = document.getElementById('categoryFilter').value.toLowerCase();
-        const rows   = document.querySelectorAll('#expenseBody tr[data-id]');
-        let visible  = 0;
+    // Search and filter functions removed since advanced search backend is now used
 
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            const catText = row.querySelector('.cat-badge')?.textContent.toLowerCase() ?? '';
-            const matchSearch = text.includes(search);
-            const matchCat    = !cat || catText.includes(cat);
-            if (matchSearch && matchCat) {
-                row.style.display = '';
-                visible++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
 
-        document.getElementById('rowCount').textContent = visible + ' enregistrement(s)';
-        document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
-    }
-
-    function clearFilters() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('categoryFilter').value = '';
-        filterTable();
-    }
 
     // ── Column sorting ──
     (function () {

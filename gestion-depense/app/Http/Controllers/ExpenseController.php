@@ -6,9 +6,52 @@ use Illuminate\Http\Request;
 use App\Models\Expense;
 use App\Models\Category;
 use App\Models\Budget;
+use App\Exports\ExpensesExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ExpenseController extends Controller
 {
+    private function getFilteredQuery(Request $request)
+    {
+        $userId = auth()->id();
+        $query = Expense::with('category')->where('user_id', $userId);
+        
+        $selectedYear = $request->input('year');
+        $selectedMonth = $request->input('month');
+        if ($request->has('year') && !$request->filled('month')) {
+            $selectedMonth = null;
+        }
+
+        if ($selectedYear && $selectedYear !== '') {
+            $query->whereYear('expense_date', $selectedYear);
+        }
+        if ($selectedMonth) {
+            $query->whereMonth('expense_date', $selectedMonth);
+        }
+        
+        $categoryId = $request->input('category_id');
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+        
+        $minAmount = $request->input('min_amount');
+        if ($minAmount !== null && $minAmount !== '') {
+            $query->where('amount', '>=', $minAmount);
+        }
+        
+        $maxAmount = $request->input('max_amount');
+        if ($maxAmount !== null && $maxAmount !== '') {
+            $query->where('amount', '<=', $maxAmount);
+        }
+        
+        $keyword = $request->input('keyword');
+        if (!empty($keyword)) {
+            $query->where('description', 'like', "%{$keyword}%");
+        }
+        
+        return $query;
+    }
 
     public function index(Request $request)
     {
@@ -16,21 +59,16 @@ class ExpenseController extends Controller
         
         $selectedYear = $request->input('year', date('Y'));
         $selectedMonth = $request->input('month', date('m'));
+        $categoryId = $request->input('category_id');
+        $minAmount = $request->input('min_amount');
+        $maxAmount = $request->input('max_amount');
+        $keyword = $request->input('keyword');
         
         if ($request->has('year') && !$request->filled('month')) {
             $selectedMonth = null;
         }
 
-        // Base Query for Expenses
-        $query = Expense::with('category')->where('user_id', $userId);
-        
-        if ($selectedYear) {
-            $query->whereYear('expense_date', $selectedYear);
-        }
-        if ($selectedMonth) {
-            $query->whereMonth('expense_date', $selectedMonth);
-        }
-
+        $query = $this->getFilteredQuery($request);
         $expenses = (clone $query)->latest()->get();
 
         // ── Monthly totals (last 12 months from the selected date context or current) ──
@@ -108,8 +146,13 @@ class ExpenseController extends Controller
             'monthlyLabels', 'monthlyTotals',
             'categoryLabels', 'categoryTotals',
             'alertes',
+            'categories',
             'selectedYear',
-            'selectedMonth'
+            'selectedMonth',
+            'categoryId',
+            'minAmount',
+            'maxAmount',
+            'keyword'
         ));
     }
 
@@ -139,5 +182,18 @@ class ExpenseController extends Controller
     {
         Expense::findOrFail($id)->delete();
         return redirect()->back();
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $expenses = $this->getFilteredQuery($request)->latest()->get();
+        return Excel::download(new ExpensesExport($expenses), 'depenses.xlsx');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $expenses = $this->getFilteredQuery($request)->latest()->get();
+        $pdf = Pdf::loadView('exports.expenses_pdf', compact('expenses'));
+        return $pdf->download('depenses.pdf');
     }
 }

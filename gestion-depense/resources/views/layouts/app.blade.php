@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.min.js"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -684,9 +685,21 @@
             .topbar { left: 0; }
             .sidebar { transform: translateX(-100%); transition: transform .3s; }
             .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0 !important; padding: calc(var(--topbar-height) + 1rem) 1rem 1rem; }
-            .page-header { padding: 1rem 1.25rem; }
-            .page-header h1 { font-size: 1.15rem; }
+            .main-content { margin-left: 0 !important; padding: calc(var(--topbar-height) + 1rem) 0.75rem 1rem; }
+            .page-header { padding: 1rem 1.25rem; border-radius: 0; margin: -1rem -0.75rem 1.25rem; }
+            .page-header h1 { font-size: 1.1rem; }
+            .stat-card { padding: 1.25rem; }
+            .stat-value { font-size: 1.25rem; }
+            .form-card { border-radius: 0; margin: -1rem -0.75rem; max-width: none; }
+            .table-card { border-radius: 12px; }
+            .btn-add { padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+        }
+
+        /* Utility for responsive tables */
+        .table-responsive-custom {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
         }
 
         .select-hint { display: flex; align-items: center; gap: .35rem; font-size: .77rem; color: #94a3b8; margin-top: .35rem; }
@@ -694,7 +707,7 @@
     </style>
     @stack('styles')
 </head>
-<body>
+<body x-data="{ sidebarOpen: false }" :class="{ 'overflow-hidden': sidebarOpen }">
 
 @auth
     @include('includes.sidebar')
@@ -711,19 +724,17 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Mobile sidebar toggle
-    (function () {
-        const toggle  = document.getElementById('sidebarToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        if (!toggle || !sidebar) return;
-
-        function openSidebar()  { sidebar.classList.add('open'); overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
-        function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); document.body.style.overflow = ''; }
-
-        toggle.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
-        if (overlay) overlay.addEventListener('click', closeSidebar);
-    })();
+    // Global touch-friendly table wrapper
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('table:not(.no-resp)').forEach(table => {
+            if (!table.parentElement.classList.contains('table-responsive')) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-responsive-custom';
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            }
+        });
+    });
 </script>
 @stack('scripts')
 </body>

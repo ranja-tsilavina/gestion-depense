@@ -1,5 +1,5 @@
 {{-- Sidebar partial – included once by layouts/app.blade.php --}}
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar" :class="{ 'open': sidebarOpen }">
     <a href="/dashboard" class="sidebar-brand">
         <span class="brand-icon"><i class="bi bi-wallet2 text-white"></i></span>
         DepenseApp

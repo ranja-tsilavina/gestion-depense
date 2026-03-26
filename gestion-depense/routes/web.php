@@ -23,11 +23,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/categories',[CategoryController::class,'index']);
     Route::post('/categories',[CategoryController::class,'store']);
     Route::delete('/categories/{id}',[CategoryController::class,'destroy']);
+    
+    Route::get('/expenses/export/excel', [ExpenseController::class, 'exportExcel'])->name('expenses.export.excel');
+    Route::get('/expenses/export/pdf', [ExpenseController::class, 'exportPdf'])->name('expenses.export.pdf');
     Route::get('/expenses',[ExpenseController::class,'index'])->name('expenses.index');
     Route::get('/expenses/create',[ExpenseController::class,'create']);
     Route::post('/expenses',[ExpenseController::class,'store']);
     Route::delete('/expenses/{id}',[ExpenseController::class,'destroy']);
 
+    Route::get('/revenues/export/excel', [RevenueController::class, 'exportExcel'])->name('revenues.export.excel');
+    Route::get('/revenues/export/pdf', [RevenueController::class, 'exportPdf'])->name('revenues.export.pdf');
     Route::get('/revenues', [RevenueController::class, 'index'])->name('revenues.index');
     Route::get('/revenues/create', [RevenueController::class, 'create']);
     Route::post('/revenues', [RevenueController::class, 'store']);

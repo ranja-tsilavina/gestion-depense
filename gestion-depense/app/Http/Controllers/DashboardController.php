@@ -44,6 +44,34 @@ class DashboardController extends Controller
         $totalExpenses = $expensesQuery->sum('amount');
         $totalRevenues = $revenuesQuery->sum('amount');
 
+        // 4. Financial Forecast
+        $forecast = 0;
+        $showForecast = false;
+        $forecastWarning = false;
+        
+        if ($selectedMonth && $selectedYear) {
+            $isCurrentMonth = ($selectedMonth == Carbon::now()->month && $selectedYear == Carbon::now()->year);
+            if ($isCurrentMonth) {
+                $daysInMonth = Carbon::createFromDate($selectedYear, $selectedMonth, 1)->daysInMonth;
+                $daysPassed = Carbon::now()->day;
+                $showForecast = true;
+                
+                if ($daysPassed > 0) {
+                    $averageDaily = $totalExpenses / $daysPassed;
+                    $forecast = $averageDaily * $daysInMonth;
+                }
+            }
+        }
+        
+        $totalBudget = Budget::where('user_id', $userId);
+        if ($selectedYear) $totalBudget->whereYear('month', $selectedYear);
+        if ($selectedMonth) $totalBudget->whereMonth('month', $selectedMonth);
+        $totalBudgetAmount = $totalBudget->sum('amount');
+        
+        if ($showForecast && $totalBudgetAmount > 0) {
+            $forecastWarning = ($forecast > $totalBudgetAmount);
+        }
+
         // 2. Budget Alerts & 3. Charts Data
         $categories = Category::all();
         $alertes = [];
@@ -81,9 +109,21 @@ class DashboardController extends Controller
             }
 
             // Alerts
-            if ($budgetAmount > 0 && $catExpenses > $budgetAmount) {
+            if ($budgetAmount > 0) {
+                $percentage = ($catExpenses / $budgetAmount) * 100;
                 $period = $selectedMonth ? "du mois" : "de l'année";
-                $alertes[] = "Attention : Vous avez dépassé le budget {$period} de la catégorie '{$category->name}' !";
+
+                if ($percentage >= 100) {
+                    $alertes[] = [
+                        'type' => 'danger',
+                        'message' => "Attention : Vous avez dépassé le budget {$period} de la catégorie '{$category->name}' !"
+                    ];
+                } elseif ($percentage >= 80) {
+                    $alertes[] = [
+                        'type' => 'warning',
+                        'message' => "Alerte : Vous avez atteint " . round($percentage) . "% du budget {$period} de la catégorie '{$category->name}'."
+                    ];
+                }
             }
 
             // Charts
@@ -102,7 +142,10 @@ class DashboardController extends Controller
             'chartExpenses',
             'chartBudgets',
             'selectedYear',
-            'selectedMonth'
+            'selectedMonth',
+            'forecast',
+            'showForecast',
+            'forecastWarning'
         ));
     }
 }

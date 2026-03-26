@@ -12,7 +12,36 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
-        return view('categories.index',compact('categories'));
+        $userId = auth()->id();
+        $currentMonth = date('m');
+        $currentYear = date('Y');
+
+        foreach ($categories as $category) {
+            $catExpenses = Expense::where('user_id', $userId)
+                                ->where('category_id', $category->id)
+                                ->whereMonth('expense_date', $currentMonth)
+                                ->whereYear('expense_date', $currentYear)
+                                ->sum('amount');
+                                
+            $budget = Budget::where('user_id', $userId)
+                            ->where('category_id', $category->id)
+                            ->whereMonth('month', $currentMonth)
+                            ->whereYear('month', $currentYear)
+                            ->first();
+                            
+            $budgetAmount = $budget ? $budget->amount : 0;
+            
+            $category->current_expenses = $catExpenses;
+            $category->monthly_budget = $budgetAmount;
+            
+            if ($budgetAmount > 0) {
+                $category->budget_percentage = ($catExpenses / $budgetAmount) * 100;
+            } else {
+                $category->budget_percentage = 0;
+            }
+        }
+
+        return view('categories.index', compact('categories'));
     }
 
     public function store(Request $request)

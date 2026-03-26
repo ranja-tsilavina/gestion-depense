@@ -86,18 +86,37 @@
                     @else
                         <ul class="category-list">
                             @foreach($categories as $index => $category)
-                                <li class="d-flex justify-content-between align-items-center" style="background:var(--light);padding:0.5rem;border-radius:12px;border:1px solid rgba(0,0,0,0.03);">
-                                    <span class="category-pill mb-0" style="background:transparent;border:none;padding:0">
-                                        <span class="category-num">{{ $index + 1 }}</span>
-                                        {{ $category->name }}
-                                    </span>
-                                    <form method="POST" action="/categories/{{ $category->id }}" class="m-0" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:8px;padding:0.25rem 0.5rem" title="Supprimer">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                <li class="mb-3" style="background:var(--light);padding:0.5rem;border-radius:12px;border:1px solid rgba(0,0,0,0.03);">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="category-pill mb-0" style="background:transparent;border:none;padding:0">
+                                            <span class="category-num" style="width:28px;height:28px;line-height:28px">{{ $index + 1 }}</span>
+                                            <span style="font-weight:600">{{ $category->name }}</span>
+                                        </span>
+                                        <form method="POST" action="/categories/{{ $category->id }}" class="m-0" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:8px;padding:0.35rem 0.6rem" title="Supprimer">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    
+                                    <!-- Budget Alert Indicator -->
+                                    @if(isset($category->budget_percentage) && $category->budget_percentage >= 80)
+                                        @php
+                                            $isDanger = $category->budget_percentage >= 100;
+                                            $bgClass = $isDanger ? '#fef2f2' : '#fffbeb';
+                                            $borderClass = $isDanger ? '#fecaca' : '#fde68a';
+                                            $colorClass = $isDanger ? '#991b1b' : '#92400e';
+                                            $iconClass = $isDanger ? 'bi-exclamation-octagon-fill' : 'bi-exclamation-triangle-fill';
+                                            $iconColorClass = $isDanger ? '#ef4444' : '#f59e0b';
+                                            $text = $isDanger ? 'Budget dépassé (' . round($category->budget_percentage) . '%)' : 'Budget atteint à ' . round($category->budget_percentage) . '%';
+                                        @endphp
+                                        <div class="mt-3 d-flex align-items-center p-2" style="background:{{ $bgClass }};border:1px solid {{ $borderClass }};color:{{ $colorClass }};border-radius:8px;font-size:0.85rem;font-weight:500;">
+                                            <i class="bi {{ $iconClass }} me-2" style="color:{{ $iconColorClass }}"></i>
+                                            <span>{{ $text }}</span>
+                                        </div>
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>

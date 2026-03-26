@@ -58,17 +58,31 @@
     <!-- Budget Alerts -->
     @if(!empty($alertes) && count($alertes) > 0)
         @foreach($alertes as $alerte)
-        <div class="alert alert-danger alert-custom alert-dismissible fade show mb-3" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ $alerte }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+            @php
+                $isDanger = $alerte['type'] === 'danger';
+                $bgClass = $isDanger ? '#fef2f2' : '#fffbeb';
+                $borderClass = $isDanger ? '#fecaca' : '#fde68a';
+                $colorClass = $isDanger ? '#991b1b' : '#92400e';
+                $iconClass = $isDanger ? 'bi-exclamation-octagon-fill' : 'bi-exclamation-triangle-fill';
+                $iconColorClass = $isDanger ? '#ef4444' : '#f59e0b';
+            @endphp
+            <div x-data="{ show: true }" x-show="show" x-transition.opacity.duration.300ms class="mb-3 d-flex align-items-center justify-content-between p-3" style="background:{{ $bgClass }};border:1px solid {{ $borderClass }};color:{{ $colorClass }};border-radius:12px;font-weight:500;">
+                <div class="d-flex align-items-center">
+                    <i class="bi {{ $iconClass }} me-2" style="color:{{ $iconColorClass }};font-size:1.1rem"></i>
+                    <span>{{ $alerte['message'] }}</span>
+                </div>
+                <button type="button" @click="show = false" class="btn btn-sm" style="color:{{ $colorClass }};opacity:0.7">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
         @endforeach
     @endif
 
     <!-- Stat Cards -->
     <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-xl-4">
-            <div class="stat-card card-revenue">
+        @php $colClass = (isset($showForecast) && $showForecast) ? 'col-xl-3' : 'col-xl-4'; @endphp
+        <div class="col-sm-6 {{ $colClass }}">
+            <div class="stat-card card-revenue h-100 d-flex flex-column justify-content-center">
                 <div class="stat-icon" style="background:#dcfce7">
                     <i class="bi bi-arrow-down-circle" style="color:#16a34a"></i>
                 </div>
@@ -78,8 +92,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-4">
-            <div class="stat-card card-expense">
+        <div class="col-sm-6 {{ $colClass }}">
+            <div class="stat-card card-expense h-100 d-flex flex-column justify-content-center">
                 <div class="stat-icon" style="background:#fef2f2">
                     <i class="bi bi-arrow-up-circle" style="color:#ef4444"></i>
                 </div>
@@ -89,9 +103,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-4">
+        <div class="col-sm-6 {{ $colClass }}">
             @php $balance = ($totalRevenues ?? 0) - ($totalExpenses ?? 0); @endphp
-            <div class="stat-card card-balance">
+            <div class="stat-card card-balance h-100 d-flex flex-column justify-content-center">
                 <div class="stat-icon" style="background:#ede9fe">
                     <i class="bi bi-wallet2" style="color:var(--primary)"></i>
                 </div>
@@ -101,6 +115,21 @@
                 </div>
             </div>
         </div>
+        @if(isset($showForecast) && $showForecast)
+        <div class="col-sm-6 {{ $colClass }}">
+            <div class="stat-card h-100 d-flex flex-column justify-content-center" style="border:1px solid rgba(0,0,0,0.04);">
+                <div class="stat-icon" style="background:#f3e8ff">
+                    <i class="bi bi-graph-up-arrow" style="color:#9333ea"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Prévision fin de mois</div>
+                    <div class="stat-value" style="{{ $forecastWarning ? 'color:#ef4444' : '' }}">
+                        {{ number_format($forecast ?? 0, 0, ',', ' ') }} <span style="font-size:0.9rem;font-weight:500;color:#94a3b8">Ar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- Charts -->
