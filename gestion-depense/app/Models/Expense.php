@@ -7,13 +7,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Category;
 use App\Models\User;
 
+use App\Traits\BelongsToHousehold;
+
 class Expense extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToHousehold;
 
     protected $fillable = [
         'user_id',
+        'household_id',
         'category_id',
+        'account_id',
         'amount',
         'description',
         'expense_date'
@@ -27,6 +31,11 @@ class Expense extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
     }
 
     public function categoryBudget()

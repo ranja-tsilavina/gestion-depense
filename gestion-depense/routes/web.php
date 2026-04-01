@@ -6,6 +6,9 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\RevenueController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\TransferController;
+use App\Http\Controllers\HouseholdController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -42,6 +45,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/budgets/create', [BudgetController::class, 'create']);
     Route::post('/budgets', [BudgetController::class, 'store']);
     Route::delete('/budgets/{id}', [BudgetController::class, 'destroy']);
+
+    Route::resource('accounts', AccountController::class);
+    Route::resource('transfers', TransferController::class)->only(['index', 'create', 'store']);
+    
+    Route::get('/households', [HouseholdController::class, 'index'])->name('households.index');
+    Route::post('/households', [HouseholdController::class, 'store'])->name('households.store');
+    Route::post('/households/add-member', [HouseholdController::class, 'addMember'])->name('households.add_member');
+    Route::get('/households/switch/{id}', [HouseholdController::class, 'switch'])->name('households.switch');
 });
 
 

@@ -96,12 +96,32 @@
                             @error('category_id')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
-                            <div class="select-hint">
-                                <i class="bi bi-plus-circle"></i>
-                                <a href="/categories" style="color:var(--primary);font-weight:600;text-decoration:none">Gérer les catégories</a>
-                            </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="field-group mt-3">
+                    <label class="field-label" for="account_id">
+                        <i class="bi bi-bank"></i>
+                        Compte à débiter <span class="required-star">*</span>
+                    </label>
+                    <select
+                        id="account_id"
+                        name="account_id"
+                        class="form-select @error('account_id') is-invalid @enderror"
+                        required
+                    >
+                        <option value="" disabled {{ old('account_id') ? '' : 'selected' }}>-- Choisir un compte --</option>
+                        @foreach($accounts as $account)
+                            <option value="{{ $account->id }}"
+                                {{ old('account_id') == $account->id ? 'selected' : '' }}>
+                                {{ $account->name }} (Solde: {{ number_format($account->balance, 0, ',', ' ') }} Ar)
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('account_id')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <!-- Date -->

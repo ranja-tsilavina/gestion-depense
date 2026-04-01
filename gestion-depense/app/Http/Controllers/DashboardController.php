@@ -7,6 +7,7 @@ use App\Models\Expense;
 use App\Models\Revenue;
 use App\Models\Budget;
 use App\Models\Category;
+use App\Models\Account;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -43,6 +44,16 @@ class DashboardController extends Controller
 
         $totalExpenses = $expensesQuery->sum('amount');
         $totalRevenues = $revenuesQuery->sum('amount');
+
+        // 2. Account Balances (Current)
+        $accounts = Account::all();
+        $totalBalance = $accounts->sum('balance');
+
+        // 3. Savings Rate
+        $savingsRate = 0;
+        if ($totalRevenues > 0) {
+            $savingsRate = (($totalRevenues - $totalExpenses) / $totalRevenues) * 100;
+        }
 
         // 4. Financial Forecast
         $forecast = 0;
@@ -137,6 +148,9 @@ class DashboardController extends Controller
         return view('dashboard', compact(
             'totalExpenses',
             'totalRevenues',
+            'totalBalance',
+            'savingsRate',
+            'accounts',
             'alertes',
             'chartCategories',
             'chartExpenses',

@@ -24,6 +24,16 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function households()
+    {
+        return $this->belongsToMany(Household::class)->withPivot('role')->withTimestamps();
+    }
+
+    public function accounts()
+    {
+        return $this->hasMany(Account::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

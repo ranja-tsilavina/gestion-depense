@@ -2,8 +2,12 @@
 <aside class="sidebar" id="sidebar" :class="{ 'open': sidebarOpen }">
     <a href="/dashboard" class="sidebar-brand">
         <span class="brand-icon"><i class="bi bi-wallet2 text-white"></i></span>
-        DepenseApp
+        FintechApp
     </a>
+    <div class="px-3 mb-3 text-center">
+        <small class="text-white-50 text-uppercase fw-bold" style="font-size:0.65rem">Ma Maison Actuelle</small>
+        <div class="text-white small fw-bold">{{ App\Models\Household::find(session('active_household_id'))->name ?? 'Sans Maison' }}</div>
+    </div>
 
     <nav>
         <a href="/dashboard" class="nav-link-custom {{ request()->is('dashboard') ? 'active' : '' }}">
@@ -20,6 +24,19 @@
         </a>
         <a href="/budgets" class="nav-link-custom {{ request()->is('budgets*') ? 'active' : '' }}">
             <i class="bi bi-wallet"></i> Budgets
+        </a>
+        
+        <div style="border-top:1px solid rgba(255,255,255,.12);margin:0.5rem 0"></div>
+        <small class="text-white-50 px-3 py-2 d-block text-uppercase fw-bold" style="font-size:0.65rem">Système Financier</small>
+        
+        <a href="/accounts" class="nav-link-custom {{ request()->is('accounts*') ? 'active' : '' }}">
+            <i class="bi bi-bank text-info"></i> Comptes
+        </a>
+        <a href="/transfers" class="nav-link-custom {{ request()->is('transfers*') ? 'active' : '' }}">
+            <i class="bi bi-arrow-left-right text-success"></i> Transferts
+        </a>
+        <a href="/households" class="nav-link-custom {{ request()->is('households*') ? 'active' : '' }}">
+            <i class="bi bi-house-door text-warning"></i> Ma Maison
         </a>
 
         <div style="border-top:1px solid rgba(255,255,255,.12);margin:1rem 0"></div>

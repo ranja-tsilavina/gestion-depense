@@ -7,6 +7,8 @@ use App\Models\Revenue;
 use App\Exports\RevenuesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Account;
+use Illuminate\Support\Facades\DB;
 
 class RevenueController extends Controller
 {
@@ -78,26 +80,49 @@ class RevenueController extends Controller
 
     public function create()
     {
-        return view('revenues.create');
+        $accounts = Account::all();
+        return view('revenues.create', compact('accounts'));
     }
 
     public function store(Request $request)
     {
-        Revenue::create([
-            'user_id' => auth()->id(),
-            'source' => $request->source,
-            'amount' => $request->amount,
-            'description' => $request->description,
-            'revenue_date' => $request->revenue_date
+        $request->validate([
+            'account_id' => 'required|exists:accounts,id',
+            'source' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
+            'revenue_date' => 'required|date',
+            'description' => 'nullable|string'
         ]);
 
-        return redirect()->route('revenues.index');
+        DB::transaction(function () use ($request) {
+            Revenue::create([
+                'user_id' => auth()->id(),
+                'account_id' => $request->account_id,
+                'source' => $request->source,
+                'amount' => $request->amount,
+                'description' => $request->description,
+                'revenue_date' => $request->revenue_date
+            ]);
+
+            $account = Account::findOrFail($request->account_id);
+            $account->increment('balance', $request->amount);
+        });
+
+        return redirect()->route('revenues.index')->with('success', 'Revenu enregistré.');
     }
 
     public function destroy($id)
     {
-        Revenue::findOrFail($id)->delete();
-        return redirect()->back();
+        DB::transaction(function () use ($id) {
+            $revenue = Revenue::findOrFail($id);
+            if ($revenue->account_id) {
+                $account = Account::findOrFail($revenue->account_id);
+                $account->decrement('balance', $revenue->amount);
+            }
+            $revenue->delete();
+        });
+        
+        return redirect()->back()->with('success', 'Revenu supprimé.');
     }
 
     public function exportExcel(Request $request)

@@ -9,6 +9,8 @@ use App\Models\Budget;
 use App\Exports\ExpensesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Account;
+use Illuminate\Support\Facades\DB;
 
 class ExpenseController extends Controller
 {
@@ -160,28 +162,49 @@ class ExpenseController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('expenses.create',compact('categories'));
+        $accounts = Account::all();
+        return view('expenses.create', compact('categories', 'accounts'));
     }
-
 
     public function store(Request $request)
     {
-        Expense::create([
-            'user_id'=>auth()->id(),
-            'category_id'=>$request->category_id,
-            'amount'=>$request->amount,
-            'description'=>$request->description,
-            'expense_date'=>$request->expense_date
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'account_id' => 'required|exists:accounts,id',
+            'amount' => 'required|numeric|min:0.01',
+            'expense_date' => 'required|date',
+            'description' => 'nullable|string'
         ]);
 
-        return redirect()->route('expenses.index');
-    }
+        DB::transaction(function () use ($request) {
+            Expense::create([
+                'user_id' => auth()->id(),
+                'category_id' => $request->category_id,
+                'account_id' => $request->account_id,
+                'amount' => $request->amount,
+                'description' => $request->description,
+                'expense_date' => $request->expense_date
+            ]);
 
+            $account = Account::findOrFail($request->account_id);
+            $account->decrement('balance', $request->amount);
+        });
+
+        return redirect()->route('expenses.index')->with('success', 'Dépense enregistrée.');
+    }
 
     public function destroy($id)
     {
-        Expense::findOrFail($id)->delete();
-        return redirect()->back();
+        DB::transaction(function () use ($id) {
+            $expense = Expense::findOrFail($id);
+            if ($expense->account_id) {
+                $account = Account::findOrFail($expense->account_id);
+                $account->increment('balance', $expense->amount);
+            }
+            $expense->delete();
+        });
+        
+        return redirect()->back()->with('success', 'Dépense supprimée.');
     }
 
     public function exportExcel(Request $request)

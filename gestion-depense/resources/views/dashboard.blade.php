@@ -80,56 +80,96 @@
 
     <!-- Stat Cards -->
     <div class="row g-3 mb-4">
-        @php $colClass = (isset($showForecast) && $showForecast) ? 'col-xl-3' : 'col-xl-4'; @endphp
-        <div class="col-sm-6 {{ $colClass }}">
+        <!-- Card 1: Total Balance (Global) -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card h-100 d-flex flex-column justify-content-center" style="background:#f0f9ff;border:1px solid #bae6fd">
+                <div class="stat-icon" style="background:#e0f2fe">
+                    <i class="bi bi-bank" style="color:#0ea5e9"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Patrimoine Total</div>
+                    <div class="stat-value" style="color:#0369a1">{{ number_format($totalBalance ?? 0, 0, ',', ' ') }} <span style="font-size:.9rem;font-weight:500;color:#94a3b8">Ar</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Savings Rate -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card h-100 d-flex flex-column justify-content-center" style="background:#fff7ed;border:1px solid #ffedd5">
+                <div class="stat-icon" style="background:#ffedd5">
+                    <i class="bi bi-piggy-bank" style="color:#f97316"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Taux d'Épargne</div>
+                    <div class="stat-value" style="color:#c2410c">{{ number_format($savingsRate, 1) }} %</div>
+                    <div class="progress mt-2" style="height:6px;background:#ffedd5">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width:{{ min(100, max(0, $savingsRate)) }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Income (Month) -->
+        <div class="col-sm-6 col-xl-3">
             <div class="stat-card card-revenue h-100 d-flex flex-column justify-content-center">
                 <div class="stat-icon" style="background:#dcfce7">
                     <i class="bi bi-arrow-down-circle" style="color:#16a34a"></i>
                 </div>
                 <div>
-                    <div class="stat-label">Total Revenus</div>
+                    <div class="stat-label">Revenus (Période)</div>
                     <div class="stat-value">{{ number_format($totalRevenues ?? 0, 0, ',', ' ') }} <span style="font-size:.9rem;font-weight:500;color:#94a3b8">Ar</span></div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 {{ $colClass }}">
+
+        <!-- Card 4: Expense (Month) -->
+        <div class="col-sm-6 col-xl-3">
             <div class="stat-card card-expense h-100 d-flex flex-column justify-content-center">
                 <div class="stat-icon" style="background:#fef2f2">
                     <i class="bi bi-arrow-up-circle" style="color:#ef4444"></i>
                 </div>
                 <div>
-                    <div class="stat-label">Total Dépenses</div>
+                    <div class="stat-label">Dépenses (Période)</div>
                     <div class="stat-value">{{ number_format($totalExpenses ?? 0, 0, ',', ' ') }} <span style="font-size:.9rem;font-weight:500;color:#94a3b8">Ar</span></div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 {{ $colClass }}">
-            @php $balance = ($totalRevenues ?? 0) - ($totalExpenses ?? 0); @endphp
-            <div class="stat-card card-balance h-100 d-flex flex-column justify-content-center">
-                <div class="stat-icon" style="background:#ede9fe">
-                    <i class="bi bi-wallet2" style="color:var(--primary)"></i>
+    </div>
+
+    <!-- Accounts Summary Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-custom border-0 shadow-sm" style="border-radius:16px;">
+                <div class="card-header-custom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Récapitulatif des Comptes</h5>
+                    <a href="{{ route('accounts.index') }}" class="btn btn-sm btn-outline-primary" style="border-radius:8px">Gérer</a>
                 </div>
-                <div>
-                    <div class="stat-label">Solde restant</div>
-                    <div class="stat-value" style="{{ $balance < 0 ? 'color:#ef4444' : '' }}">{{ number_format($balance, 0, ',', ' ') }} <span style="font-size:.9rem;font-weight:500;color:#94a3b8">Ar</span></div>
-                </div>
-            </div>
-        </div>
-        @if(isset($showForecast) && $showForecast)
-        <div class="col-sm-6 {{ $colClass }}">
-            <div class="stat-card h-100 d-flex flex-column justify-content-center" style="border:1px solid rgba(0,0,0,0.04);">
-                <div class="stat-icon" style="background:#f3e8ff">
-                    <i class="bi bi-graph-up-arrow" style="color:#9333ea"></i>
-                </div>
-                <div>
-                    <div class="stat-label">Prévision fin de mois</div>
-                    <div class="stat-value" style="{{ $forecastWarning ? 'color:#ef4444' : '' }}">
-                        {{ number_format($forecast ?? 0, 0, ',', ' ') }} <span style="font-size:0.9rem;font-weight:500;color:#94a3b8">Ar</span>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0 align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 border-0 py-3">Compte</th>
+                                    <th class="border-0">Solde</th>
+                                    <th class="pe-4 border-0 text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($accounts as $acc)
+                                <tr>
+                                    <td class="ps-4 border-0 py-3 fw-bold">{{ $acc->name }}</td>
+                                    <td class="border-0">{{ number_format($acc->balance, 0, ',', ' ') }} Ar</td>
+                                    <td class="pe-4 border-0 text-end">
+                                        <a href="{{ route('transfers.create') }}?from={{ $acc->id }}" class="btn btn-sm btn-light" style="font-size:0.75rem">Transférer</a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
-        @endif
     </div>
 
     <!-- Charts -->
