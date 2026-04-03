@@ -36,6 +36,8 @@
                         <th>#</th>
                         <th>Catégorie</th>
                         <th>Montant</th>
+                        <th>Dépensé</th>
+                        <th>Restant</th>
                         <th>Mois</th>
                         @can('create', App\Models\Budget::class)
                         <th class="text-center">Action</th>
@@ -54,6 +56,14 @@
                         </td>
                         <td class="amount-cell">
                             {{ number_format($budget->amount, 0, ',', ' ') }}
+                            <span class="amount-currency">Ar</span>
+                        </td>
+                        <td class="amount-cell text-muted">
+                            {{ number_format($budget->spent ?? 0, 0, ',', ' ') }}
+                            <span class="amount-currency">Ar</span>
+                        </td>
+                        <td class="amount-cell {{ ($budget->remaining ?? $budget->amount) < 0 ? 'text-danger fw-bold' : 'text-success fw-bold' }}">
+                            {{ number_format($budget->remaining ?? $budget->amount, 0, ',', ' ') }}
                             <span class="amount-currency">Ar</span>
                         </td>
                         <td>
@@ -75,7 +85,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5">
+                        <td colspan="7">
                             <div class="empty-state">
                                 <i class="bi bi-wallet"></i>
                                 <p>Aucun budget enregistré.<br>
