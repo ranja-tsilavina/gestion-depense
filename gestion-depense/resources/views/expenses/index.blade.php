@@ -246,6 +246,7 @@
                             Date
                             <span class="sort-icon"><i class="bi bi-caret-up-fill ci-up"></i><i class="bi bi-caret-down-fill ci-down"></i></span>
                         </th>
+                        <th>Créé par</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -274,6 +275,14 @@
                                 {{ \Carbon\Carbon::parse($expense->expense_date)->format('d/m/Y') }}
                             </span>
                         </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-1">
+                                <div class="avatar-circle" style="width:22px;height:22px;font-size:.6rem;flex-shrink:0;">
+                                    {{ strtoupper(substr($expense->creator->name ?? '?', 0, 1)) }}
+                                </div>
+                                <small class="text-muted">{{ $expense->creator->name ?? '—' }}</small>
+                            </div>
+                        </td>
                         <td class="text-center">
                             <button
                                 class="btn-delete"
@@ -298,6 +307,11 @@
                 </tbody>
             </table>
         </div>
+        @if($expenses->hasPages())
+            <div class="px-4 py-3 border-top">
+                {{ $expenses->links('pagination::bootstrap-5') }}
+            </div>
+        @endif
 
         <!-- No results row (injected by JS) -->
         <div id="noResults" class="empty-state" style="display:none">

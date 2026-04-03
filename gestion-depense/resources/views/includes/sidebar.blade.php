@@ -16,28 +16,48 @@
         <a href="/expenses" class="nav-link-custom {{ request()->is('expenses*') ? 'active' : '' }}">
             <i class="bi bi-receipt-cutoff"></i> Dépenses
         </a>
+        @if(auth()->user()->isOwner())
         <a href="/revenues" class="nav-link-custom {{ request()->is('revenues*') ? 'active' : '' }}">
             <i class="bi bi-plus-circle"></i> Revenus
         </a>
         <a href="/categories" class="nav-link-custom {{ request()->is('categories*') ? 'active' : '' }}">
             <i class="bi bi-tag"></i> Catégories
         </a>
+        @endif
         <a href="/budgets" class="nav-link-custom {{ request()->is('budgets*') ? 'active' : '' }}">
             <i class="bi bi-wallet"></i> Budgets
         </a>
-        
+
+        @if(auth()->user()->isOwner())
         <div style="border-top:1px solid rgba(255,255,255,.12);margin:0.5rem 0"></div>
         <small class="text-white-50 px-3 py-2 d-block text-uppercase fw-bold" style="font-size:0.65rem">Système Financier</small>
-        
+
         <a href="/accounts" class="nav-link-custom {{ request()->is('accounts*') ? 'active' : '' }}">
             <i class="bi bi-bank text-info"></i> Comptes
         </a>
         <a href="/transfers" class="nav-link-custom {{ request()->is('transfers*') ? 'active' : '' }}">
             <i class="bi bi-arrow-left-right text-success"></i> Transferts
         </a>
-        <a href="/households" class="nav-link-custom {{ request()->is('households*') ? 'active' : '' }}">
+
+        <div style="border-top:1px solid rgba(255,255,255,.12);margin:0.5rem 0"></div>
+        <small class="text-white-50 px-3 py-2 d-block text-uppercase fw-bold" style="font-size:0.65rem">Journal</small>
+
+        <a href="{{ route('activities.index') }}" class="nav-link-custom {{ request()->is('activities*') ? 'active' : '' }}">
+            <i class="bi bi-activity text-warning"></i> Journal d'Activité
+        </a>
+        @endif
+
+        @if(auth()->user()->isOwner())
+        <div style="border-top:1px solid rgba(255,255,255,.12);margin:0.5rem 0"></div>
+        <small class="text-white-50 px-3 py-2 d-block text-uppercase fw-bold" style="font-size:0.65rem">Administration</small>
+
+        <a href="{{ route('households.members') }}" class="nav-link-custom {{ request()->is('households/members*') ? 'active' : '' }}">
+            <i class="bi bi-people-fill" style="color:#f472b6"></i> Gestion Famille
+        </a>
+        <a href="/households" class="nav-link-custom {{ request()->is('households') ? 'active' : '' }}">
             <i class="bi bi-house-door text-warning"></i> Ma Maison
         </a>
+        @endif
 
         <div style="border-top:1px solid rgba(255,255,255,.12);margin:1rem 0"></div>
 

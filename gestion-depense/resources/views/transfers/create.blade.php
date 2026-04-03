@@ -48,7 +48,7 @@
             <div class="field-group">
                 <label class="field-label">Montant du transfert (Ar)</label>
                 <div class="amount-wrapper">
-                    <input type="number" name="amount" step="0.01" class="form-control" placeholder="0.00" required>
+                    <input type="text" name="amount" class="form-control money-input" placeholder="0" required>
                 </div>
             </div>
 

@@ -15,23 +15,16 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = Auth::id();
-        
-        // Default to current month and year if no filters are applied, unless "all" or specific year is requested
-        // Actually, if they want "Year only", month will be empty.
-        // Let's set default: if no year is provided, default to current year.
-        // If no month is provided and no year is provided, default to current month.
-        $selectedYear = $request->input('year', Carbon::now()->year);
+        // Filters
+        $selectedYear  = $request->input('year', Carbon::now()->year);
         $selectedMonth = $request->input('month', Carbon::now()->month);
-        
-        // If user explicitly submitted the form and chose "Tous les mois" (empty value), $selectedMonth will be null.
         if ($request->has('year') && !$request->filled('month')) {
             $selectedMonth = null;
         }
 
-        // 1. Total Stats (Filtered)
-        $expensesQuery = Expense::where('user_id', $userId);
-        $revenuesQuery = Revenue::where('user_id', $userId);
+        // 1. Total Stats – household scope applied automatically by BelongsToHousehold
+        $expensesQuery = Expense::query();
+        $revenuesQuery = Revenue::query();
 
         if ($selectedYear) {
             $expensesQuery->whereYear('expense_date', $selectedYear);
@@ -74,7 +67,7 @@ class DashboardController extends Controller
             }
         }
         
-        $totalBudget = Budget::where('user_id', $userId);
+        $totalBudget = Budget::query();
         if ($selectedYear) $totalBudget->whereYear('month', $selectedYear);
         if ($selectedMonth) $totalBudget->whereMonth('month', $selectedMonth);
         $totalBudgetAmount = $totalBudget->sum('amount');
@@ -90,34 +83,20 @@ class DashboardController extends Controller
         $chartExpenses = [];
         $chartBudgets = [];
 
+        // Optimized Queries (No N+1)
+        $expenseStatsQuery = Expense::selectRaw('category_id, SUM(amount) as total');
+        if ($selectedYear) $expenseStatsQuery->whereYear('expense_date', $selectedYear);
+        if ($selectedMonth) $expenseStatsQuery->whereMonth('expense_date', $selectedMonth);
+        $expenseStats = $expenseStatsQuery->groupBy('category_id')->pluck('total', 'category_id');
+
+        $budgetStatsQuery = Budget::selectRaw('category_id, SUM(amount) as total');
+        if ($selectedYear) $budgetStatsQuery->whereYear('month', $selectedYear);
+        if ($selectedMonth) $budgetStatsQuery->whereMonth('month', $selectedMonth);
+        $budgetStats = $budgetStatsQuery->groupBy('category_id')->pluck('total', 'category_id');
+
         foreach ($categories as $category) {
-            // Expenses for this category
-            $catExpQuery = Expense::where('user_id', $userId)
-                ->where('category_id', $category->id);
-            
-            // Budget for this category
-            $catBudgetQuery = Budget::where('user_id', $userId)
-                ->where('category_id', $category->id);
-
-            if ($selectedYear) {
-                $catExpQuery->whereYear('expense_date', $selectedYear);
-                $catBudgetQuery->whereYear('month', $selectedYear);
-            }
-            if ($selectedMonth) {
-                $catExpQuery->whereMonth('expense_date', $selectedMonth);
-                $catBudgetQuery->whereMonth('month', $selectedMonth);
-            }
-
-            $catExpenses = $catExpQuery->sum('amount');
-            
-            // If filtering by specific month, get that month's budget.
-            // If filtering by year, sum the budgets for all months in that year.
-            if ($selectedMonth) {
-                $budget = $catBudgetQuery->first();
-                $budgetAmount = $budget ? $budget->amount : 0;
-            } else {
-                $budgetAmount = $catBudgetQuery->sum('amount');
-            }
+            $catExpenses = $expenseStats[$category->id] ?? 0;
+            $budgetAmount = $budgetStats[$category->id] ?? 0;
 
             // Alerts
             if ($budgetAmount > 0) {

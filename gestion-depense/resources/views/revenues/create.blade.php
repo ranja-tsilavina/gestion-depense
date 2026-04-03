@@ -55,7 +55,7 @@
                                 Montant <span class="required-star">*</span>
                             </label>
                             <div style="position:relative">
-                                <input type="number" step="0.01" id="amount" name="amount" class="form-control @error('amount') is-invalid @enderror" placeholder="0" value="{{ old('amount') }}" min="1" required style="padding-right:3.5rem">
+                                <input type="text" id="amount" name="amount" class="form-control money-input @error('amount') is-invalid @enderror" placeholder="0" value="{{ old('amount') }}" required style="padding-right:3.5rem">
                                 <span style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.85rem;font-weight:600;pointer-events:none">Ar</span>
                             </div>
                             @error('amount')

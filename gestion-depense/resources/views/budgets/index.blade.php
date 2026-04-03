@@ -9,9 +9,11 @@
         <h1><i class="bi bi-wallet me-2" style="color:var(--primary)"></i>Mes Budgets</h1>
         <div class="d-flex align-items-center gap-2">
             <span class="badge-count">{{ $budgets->count() }} budget(s)</span>
+            @can('create', App\Models\Budget::class)
             <a href="/budgets/create" class="btn-add">
                 <i class="bi bi-plus-lg"></i> Nouveau budget
             </a>
+            @endcan
         </div>
     </div>
 
@@ -35,7 +37,9 @@
                         <th>Catégorie</th>
                         <th>Montant</th>
                         <th>Mois</th>
+                        @can('create', App\Models\Budget::class)
                         <th class="text-center">Action</th>
+                        @endcan
                     </tr>
                 </thead>
                 <tbody>
@@ -57,6 +61,7 @@
                                 <i class="bi bi-calendar3 me-1"></i>{{ $budget->month }}
                             </span>
                         </td>
+                        @can('delete', $budget)
                         <td class="text-center">
                             <form action="/budgets/{{ $budget->id }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce budget ?')">
                                 @csrf
@@ -66,6 +71,7 @@
                                 </button>
                             </form>
                         </td>
+                        @endcan
                     </tr>
                     @empty
                     <tr>
@@ -73,7 +79,9 @@
                             <div class="empty-state">
                                 <i class="bi bi-wallet"></i>
                                 <p>Aucun budget enregistré.<br>
+                                    @can('create', App\Models\Budget::class)
                                     <a href="/budgets/create" style="color:var(--primary);font-weight:600">Créer votre premier budget →</a>
+                                    @endcan
                                 </p>
                             </div>
                         </td>

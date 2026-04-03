@@ -52,11 +52,17 @@
                                         <i class="bi bi-exclamation-triangle-fill" style="color:{{ $notification['type'] == 'danger' ? '#ef4444' : '#f59e0b' }}"></i>
                                     </div>
                                 </div>
-                                <div style="flex-grow:1">
-                                    <div style="font-weight:600;font-size:0.8125rem;color:#1e293b">{{ $notification['title'] }}</div>
+                                <div style="flex-grow:1;position:relative">
+                                    <form action="{{ route('notifications.read', $notification['id'] ?? 0) }}" method="POST" style="position:absolute;top:0;right:0">
+                                        @csrf
+                                        <button type="submit" style="background:none;border:none;padding:0;color:#94a3b8;cursor:pointer" title="Marquer comme lu">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                    <div style="font-weight:600;font-size:0.8125rem;color:#1e293b;padding-right:20px">{{ $notification['title'] }}</div>
                                     <div style="font-size:0.75rem;color:#64748b;margin-bottom:4px">{{ $notification['message'] }}</div>
                                     <div class="progress" style="height:4px;border-radius:2px">
-                                        <div class="progress-bar bg-{{ $notification['type'] }}" style="width: {{ min($notification['percent'], 100) }}%"></div>
+                                        <div class="progress-bar bg-{{ $notification['type'] }}" style="width: {{ min($notification['percent'] ?? 100, 100) }}%"></div>
                                     </div>
                                 </div>
                             </div>

@@ -12,19 +12,16 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
-        $userId = auth()->id();
         $currentMonth = date('m');
         $currentYear = date('Y');
 
         foreach ($categories as $category) {
-            $catExpenses = Expense::where('user_id', $userId)
-                                ->where('category_id', $category->id)
+            $catExpenses = Expense::where('category_id', $category->id)
                                 ->whereMonth('expense_date', $currentMonth)
                                 ->whereYear('expense_date', $currentYear)
                                 ->sum('amount');
                                 
-            $budget = Budget::where('user_id', $userId)
-                            ->where('category_id', $category->id)
+            $budget = Budget::where('category_id', $category->id)
                             ->whereMonth('month', $currentMonth)
                             ->whereYear('month', $currentYear)
                             ->first();

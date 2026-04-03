@@ -16,8 +16,7 @@ class ExpenseController extends Controller
 {
     private function getFilteredQuery(Request $request)
     {
-        $userId = auth()->id();
-        $query = Expense::with('category')->where('user_id', $userId);
+        $query = Expense::with(['category', 'creator']);
         
         $selectedYear = $request->input('year');
         $selectedMonth = $request->input('month');
@@ -57,8 +56,6 @@ class ExpenseController extends Controller
 
     public function index(Request $request)
     {
-        $userId = auth()->id();
-        
         $selectedYear = $request->input('year', date('Y'));
         $selectedMonth = $request->input('month', date('m'));
         $categoryId = $request->input('category_id');
@@ -71,11 +68,10 @@ class ExpenseController extends Controller
         }
 
         $query = $this->getFilteredQuery($request);
-        $expenses = (clone $query)->latest()->get();
+        $expenses = (clone $query)->latest()->paginate(15)->withQueryString();
 
-        // ── Monthly totals (last 12 months from the selected date context or current) ──
-        // Only makes sense if "All months" is selected, otherwise it's just one month. Let's keep the logic but filter by year strictly if year is selected.
-        $monthlyQuery = Expense::where('user_id', $userId);
+        // Monthly totals – household scope applied automatically by global scope
+        $monthlyQuery = Expense::query();
         if ($selectedYear) {
             $monthlyQuery->whereYear('expense_date', $selectedYear);
         }
@@ -114,10 +110,8 @@ class ExpenseController extends Controller
         $alertes = [];
 
         foreach ($categories as $category) {
-            $catExpQuery = Expense::where('user_id', $userId)
-                                ->where('category_id', $category->id);
-            $catBudgetQuery = Budget::where('user_id', $userId)
-                            ->where('category_id', $category->id);
+            $catExpQuery = Expense::where('category_id', $category->id);
+            $catBudgetQuery = Budget::where('category_id', $category->id);
 
             if ($selectedYear) {
                 $catExpQuery->whereYear('expense_date', $selectedYear);
@@ -177,8 +171,8 @@ class ExpenseController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            Expense::create([
-                'user_id' => auth()->id(),
+            $expense = Expense::create([
+                'user_id' => auth()->id(), // keeping for compatibility, but household handles the rest
                 'category_id' => $request->category_id,
                 'account_id' => $request->account_id,
                 'amount' => $request->amount,
@@ -188,6 +182,59 @@ class ExpenseController extends Controller
 
             $account = Account::findOrFail($request->account_id);
             $account->decrement('balance', $request->amount);
+
+            // Log activity
+            \App\Models\Activity::create([
+                'household_id' => session('active_household_id'),
+                'user_id' => auth()->id(),
+                'action' => 'expense_created',
+                'description' => auth()->user()->name . " a enregistré une dépense de " . number_format($request->amount, 0, ',', ' ') . " Ar (" . ($expense->category->name ?? 'Catégorie') . ")"
+            ]);
+
+            // Notification: Expense Created
+            \App\Models\Notification::create([
+                'user_id' => auth()->id(),
+                'household_id' => session('active_household_id'),
+                'type' => 'info',
+                'message' => "Nouvelle dépense de " . number_format($request->amount, 0, ',', ' ') . " Ar (" . ($expense->category->name ?? 'Catégorie') . ")",
+                'is_read' => false
+            ]);
+
+            // Budget Alerts
+            $month = \Carbon\Carbon::parse($request->expense_date)->month;
+            $year = \Carbon\Carbon::parse($request->expense_date)->year;
+
+            $budget = \App\Models\Budget::where('category_id', $request->category_id)
+                ->whereMonth('month', $month)
+                ->whereYear('month', $year)
+                ->first();
+
+            if ($budget && $budget->amount > 0) {
+                $totalExpenses = Expense::where('category_id', $request->category_id)
+                    ->whereMonth('expense_date', $month)
+                    ->whereYear('expense_date', $year)
+                    ->sum('amount');
+                
+                $percent = ($totalExpenses / $budget->amount) * 100;
+
+                if ($percent >= 100) {
+                    \App\Models\Notification::create([
+                        'user_id' => auth()->id(),
+                        'household_id' => session('active_household_id'),
+                        'type' => 'danger',
+                        'message' => "Attention : Budget dépassé pour la catégorie '" . ($expense->category->name ?? '') . "' !",
+                        'is_read' => false
+                    ]);
+                } elseif ($percent >= 80) {
+                    \App\Models\Notification::create([
+                        'user_id' => auth()->id(),
+                        'household_id' => session('active_household_id'),
+                        'type' => 'warning',
+                        'message' => "Alerte : Vous avez atteint " . round($percent) . "% du budget pour la catégorie '" . ($expense->category->name ?? '') . "'.",
+                        'is_read' => false
+                    ]);
+                }
+            }
         });
 
         return redirect()->route('expenses.index')->with('success', 'Dépense enregistrée.');

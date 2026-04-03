@@ -16,9 +16,8 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        $userId = Auth::id();
-        $totalExpenses = \App\Models\Expense::where('user_id', $userId)->sum('amount');
-        $totalRevenues = \App\Models\Revenue::where('user_id', $userId)->sum('amount');
+        $totalExpenses = \App\Models\Expense::sum('amount');
+        $totalRevenues = \App\Models\Revenue::sum('amount');
         $balance = $totalRevenues - $totalExpenses;
 
         return view('profile.edit', [

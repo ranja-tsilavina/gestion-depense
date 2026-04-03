@@ -45,4 +45,9 @@ class Expense extends Model
                     ->whereYear('month', date('Y'))
                     ->where('user_id', $this->user_id);
     }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

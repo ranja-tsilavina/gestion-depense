@@ -50,16 +50,13 @@
                             </label>
                             <div class="amount-wrapper">
                                 <input
-                                    type="number"
+                                    type="text"
                                     id="amount"
                                     name="amount"
-                                    class="form-control @error('amount') is-invalid @enderror"
+                                    class="form-control money-input @error('amount') is-invalid @enderror"
                                     placeholder="0"
                                     value="{{ old('amount') }}"
-                                    min="1"
-                                    step="1"
                                     required
-                                    oninput="updatePreview(this.value)"
                                 >
                                 <span class="amount-suffix">Ar</span>
                             </div>
@@ -186,17 +183,6 @@
 
 @push('scripts')
 <script>
-    // Live amount preview (formatted)
-    function updatePreview(value) {
-        const preview = document.getElementById('amountPreview');
-        if (!value || value < 1) {
-            preview.style.display = 'none';
-            return;
-        }
-        const formatted = parseInt(value).toLocaleString('fr-FR');
-        preview.style.display = 'block';
-        preview.innerHTML = '<i class="bi bi-check-circle-fill me-1" style="color:#10b981"></i>' + formatted + ' Ar';
-    }
 
     // Character counter for description
     function updateCharCount(el) {
@@ -206,10 +192,6 @@
     // Pre-fill char count on page load (old() value)
     const desc = document.getElementById('description');
     if (desc && desc.value) updateCharCount(desc);
-
-    // Pre-fill amount preview on page load (old() value)
-    const amt = document.getElementById('amount');
-    if (amt && amt.value) updatePreview(amt.value);
 
     // Prevent double-submit
     document.getElementById('expenseForm').addEventListener('submit', function () {

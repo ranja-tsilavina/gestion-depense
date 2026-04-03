@@ -134,6 +134,7 @@
                         <th>Montant</th>
                         <th>Description</th>
                         <th>Date</th>
+                        <th>Créé par</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -158,6 +159,14 @@
                             <span class="date-pill">
                                 <i class="bi bi-calendar3 me-1"></i>{{ $revenue->revenue_date }}
                             </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-1">
+                                <div class="avatar-circle" style="width:22px;height:22px;font-size:.6rem;flex-shrink:0;">
+                                    {{ strtoupper(substr($revenue->creator->name ?? '?', 0, 1)) }}
+                                </div>
+                                <small class="text-muted">{{ $revenue->creator->name ?? '—' }}</small>
+                            </div>
                         </td>
                         <td class="text-center">
                             <form action="/revenues/{{ $revenue->id }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce revenu ?')">
@@ -184,6 +193,11 @@
                 </tbody>
             </table>
         </div>
+        @if($revenues->hasPages())
+            <div class="px-4 py-3 border-top">
+                {{ $revenues->links('pagination::bootstrap-5') }}
+            </div>
+        @endif
     </div>
 
 @endsection

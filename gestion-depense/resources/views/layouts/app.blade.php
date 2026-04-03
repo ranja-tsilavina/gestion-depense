@@ -735,6 +735,24 @@
             }
         });
     });
+
+    // Global Money Input Formatter
+    document.addEventListener('input', function(e) {
+        if (e.target && e.target.classList.contains('money-input')) {
+            let rawValue = e.target.value.replace(/\s+/g, '').replace(/[^0-9.]/g, '');
+            if (!rawValue) {
+                e.target.value = '';
+                return;
+            }
+            let parts = rawValue.split('.');
+            parts[0] = parseInt(parts[0], 10).toLocaleString('fr-FR').replace(/ /g, ' ');
+            if (parts.length > 1) {
+                e.target.value = parts[0] + '.' + parts[1].substring(0, 2);
+            } else {
+                e.target.value = parts[0];
+            }
+        }
+    });
 </script>
 @stack('scripts')
 </body>

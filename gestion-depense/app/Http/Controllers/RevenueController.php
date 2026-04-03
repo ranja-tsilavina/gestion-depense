@@ -14,8 +14,7 @@ class RevenueController extends Controller
 {
     private function getFilteredQuery(Request $request)
     {
-        $userId = auth()->id();
-        $query = Revenue::where('user_id', $userId);
+        $query = Revenue::with(['account', 'creator']);
         
         $selectedYear = $request->input('year');
         $selectedMonth = $request->input('month');
@@ -53,8 +52,6 @@ class RevenueController extends Controller
 
     public function index(Request $request)
     {
-        $userId = auth()->id();
-        
         $selectedYear = $request->input('year', date('Y'));
         $selectedMonth = $request->input('month', date('m'));
         $minAmount = $request->input('min_amount');
@@ -66,7 +63,7 @@ class RevenueController extends Controller
         }
 
         $query = $this->getFilteredQuery($request);
-        $revenues = $query->latest()->get();
+        $revenues = $query->latest()->paginate(15)->withQueryString();
 
         return view('revenues.index', compact(
             'revenues', 
@@ -95,8 +92,8 @@ class RevenueController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            Revenue::create([
-                'user_id' => auth()->id(),
+            $revenue = Revenue::create([
+                'user_id' => auth()->id(), // keeping for compatibility, household scope acts as global filter
                 'account_id' => $request->account_id,
                 'source' => $request->source,
                 'amount' => $request->amount,
@@ -106,6 +103,14 @@ class RevenueController extends Controller
 
             $account = Account::findOrFail($request->account_id);
             $account->increment('balance', $request->amount);
+
+            // Log activity
+            \App\Models\Activity::create([
+                'household_id' => session('active_household_id'),
+                'user_id' => auth()->id(),
+                'action' => 'revenue_created',
+                'description' => auth()->user()->name . " a ajouté un revenu de " . number_format($request->amount, 0, ',', ' ') . " Ar (" . $request->source . ")"
+            ]);
         });
 
         return redirect()->route('revenues.index')->with('success', 'Revenu enregistré.');

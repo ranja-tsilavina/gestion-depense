@@ -29,6 +29,18 @@ class User extends Authenticatable
         return $this->belongsToMany(Household::class)->withPivot('role')->withTimestamps();
     }
 
+    public function isOwner()
+    {
+        $household = $this->households()->where('household_id', session('active_household_id'))->first();
+        return $household && $household->pivot->role === 'owner';
+    }
+
+    public function isMember()
+    {
+        $household = $this->households()->where('household_id', session('active_household_id'))->first();
+        return $household && $household->pivot->role === 'member';
+    }
+
     public function accounts()
     {
         return $this->hasMany(Account::class);
