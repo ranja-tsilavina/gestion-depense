@@ -1,26 +1,67 @@
 FROM php:8.3-apache
 
+# =========================
+# Working directory
+# =========================
 WORKDIR /var/www/html
 
-# Install system dependencies
+# =========================
+# System dependencies + PHP extensions
+# =========================
 RUN apt-get update && apt-get install -y \
-    unzip git curl libzip-dev zip libonig-dev libxml2-dev \
-    && docker-php-ext-install zip pdo pdo_mysql mbstring exif pcntl bcmath
+    git curl unzip zip \
+    libzip-dev \
+    libpq-dev \
+    libonig-dev \
+    libxml2-dev \
+    && docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    pdo_pgsql \
+    mbstring \
+    zip \
+    exif \
+    pcntl \
+    bcmath
 
+# =========================
+# Enable Apache rewrite
+# =========================
+RUN a2enmod rewrite
+
+# =========================
 # Copy project
+# =========================
 COPY . .
 
-# Install Composer
+# =========================
+# Composer install
+# =========================
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install dependencies (NO SCRIPTS to avoid errors)
-RUN composer install --ignore-platform-reqs --no-dev --optimize-autoloader --no-scripts
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Apache config (point to public/)
-RUN a2enmod rewrite
-RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
-
-# Permissions
+# =========================
+# Laravel permissions
+# =========================
+RUN chmod -R 775 storage bootstrap/cache
 RUN chown -R www-data:www-data /var/www/html
 
-CMD apache2-foreground
+# =========================
+# Apache config (point to /public)
+# =========================
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+
+# =========================
+# Laravel optimization + migration
+# =========================
+RUN php artisan config:clear
+RUN php artisan cache:clear
+
+# ⚠️ safe migration (optional)
+# RUN php artisan migrate --force
+
+# =========================
+# Start server
+# =========================
+CMD php artisan migrate --force && apache2-foreground
