@@ -3,7 +3,7 @@ FROM php:8.3-apache
 WORKDIR /var/www/html
 
 # =========================
-# SYSTEM BUILD TOOLS (CRITICAL)
+# SYSTEM DEPENDENCIES (CRITICAL FIXED)
 # =========================
 RUN apt-get update && apt-get install -y \
     git curl unzip zip \
@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     autoconf \
     gcc \
     make \
+    libonig-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # =========================
@@ -23,8 +24,8 @@ RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
     pdo_pgsql \
-    zip \
     mbstring \
+    zip \
     bcmath \
     exif \
     pcntl
@@ -53,7 +54,7 @@ RUN chmod -R 775 storage bootstrap/cache
 RUN chown -R www-data:www-data /var/www/html
 
 # =========================
-# LARAVEL PUBLIC
+# LARAVEL PUBLIC FOLDER
 # =========================
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
