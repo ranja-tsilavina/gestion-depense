@@ -3,18 +3,21 @@ FROM php:8.3-apache
 WORKDIR /var/www/html
 
 # =========================
-# SYSTEM DEPENDENCIES (IMPORTANT)
+# SYSTEM BUILD TOOLS (CRITICAL)
 # =========================
 RUN apt-get update && apt-get install -y \
     git curl unzip zip \
     libzip-dev \
     libpq-dev \
-    postgresql-client \
     pkg-config \
+    build-essential \
+    autoconf \
+    gcc \
+    make \
     && rm -rf /var/lib/apt/lists/*
 
 # =========================
-# PHP EXTENSIONS (CLEAN VERSION)
+# PHP EXTENSIONS
 # =========================
 RUN docker-php-ext-install \
     pdo \
@@ -32,7 +35,7 @@ RUN docker-php-ext-install \
 RUN a2enmod rewrite
 
 # =========================
-# PROJECT
+# APP COPY
 # =========================
 COPY . .
 
