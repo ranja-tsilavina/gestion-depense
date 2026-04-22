@@ -1,67 +1,26 @@
 FROM php:8.3-apache
 
-# =========================
-# Working directory
-# =========================
 WORKDIR /var/www/html
 
-# =========================
-# System dependencies + PHP extensions
-# =========================
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git curl unzip zip \
-    libzip-dev \
-    libpq-dev \
-    libonig-dev \
-    libxml2-dev \
-    && docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    pdo_pgsql \
-    mbstring \
-    zip \
-    exif \
-    pcntl \
-    bcmath
+    unzip git curl libzip-dev zip libonig-dev libxml2-dev \
+    && docker-php-ext-install zip pdo pdo_pgsql mbstring exif pcntl bcmath
 
-# =========================
-# Enable Apache rewrite
-# =========================
-RUN a2enmod rewrite
-
-# =========================
 # Copy project
-# =========================
 COPY . .
 
-# =========================
-# Composer install
-# =========================
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# Install dependencies (NO SCRIPTS to avoid errors)
+RUN composer install --ignore-platform-reqs --no-dev --optimize-autoloader --no-scripts
 
-# =========================
-# Laravel permissions
-# =========================
-RUN chmod -R 775 storage bootstrap/cache
-RUN chown -R www-data:www-data /var/www/html
-
-# =========================
-# Apache config (point to /public)
-# =========================
+# Apache config (point to public/)
+RUN a2enmod rewrite
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
-# =========================
-# Laravel optimization + migration
-# =========================
-RUN php artisan config:clear
-RUN php artisan cache:clear
+# Permissions
+RUN chown -R www-data:www-data /var/www/html
 
-# ⚠️ safe migration (optional)
-# RUN php artisan migrate --force
-
-# =========================
-# Start server
-# =========================
-CMD php artisan migrate --force && apache2-foreground
+CMD apache2-foreground
