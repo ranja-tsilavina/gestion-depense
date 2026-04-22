@@ -57,4 +57,4 @@ RUN chown -R www-data:www-data /var/www/html
 # PUBLIC FOLDER
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
-CMD apache2-foreground
+CMD sh -c "php artisan migrate --force && apache2-foreground"
