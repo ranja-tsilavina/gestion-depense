@@ -2,22 +2,25 @@ FROM php:8.3-apache
 
 WORKDIR /var/www/html
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     unzip git curl libzip-dev zip \
     && docker-php-ext-install zip pdo pdo_mysql
 
+# Copy project
 COPY . .
 
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN composer install --no-dev --optimize-autoloader
+# Install dependencies (NO SCRIPTS to avoid errors)
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-RUN php artisan config:cache
-
-RUN chown -R www-data:www-data /var/www/html
-
-# Apache config
+# Apache config (point to public/)
 RUN a2enmod rewrite
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+
+# Permissions
+RUN chown -R www-data:www-data /var/www/html
 
 CMD apache2-foreground
