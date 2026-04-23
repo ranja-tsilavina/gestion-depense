@@ -79,8 +79,11 @@ class ExpenseController extends Controller
             $monthlyQuery->whereMonth('expense_date', $selectedMonth);
         }
         
+        $driver = \Illuminate\Support\Facades\DB::getDriverName();
+        $dateFormat = $driver === 'pgsql' ? "TO_CHAR(expense_date, 'YYYY-MM')" : "DATE_FORMAT(expense_date, '%Y-%m')";
+
         $monthlyRaw = $monthlyQuery
-            ->selectRaw("DATE_FORMAT(expense_date, '%Y-%m') as month, SUM(amount) as total")
+            ->selectRaw("$dateFormat as month, SUM(amount) as total")
             ->groupBy('month')
             ->orderBy('month')
             ->limit(12)

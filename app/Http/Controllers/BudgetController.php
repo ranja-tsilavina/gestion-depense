@@ -23,7 +23,10 @@ class BudgetController extends Controller
             $minMonth = $budgetMonths->min()->startOfMonth()->format('Y-m-d');
             $maxMonth = $budgetMonths->max()->endOfMonth()->format('Y-m-d');
 
-            $expensesRaw = \App\Models\Expense::selectRaw('category_id, DATE_FORMAT(expense_date, "%Y-%m") as month_str, SUM(amount) as total_spent')
+            $driver = \Illuminate\Support\Facades\DB::getDriverName();
+            $dateFormat = $driver === 'pgsql' ? "TO_CHAR(expense_date, 'YYYY-MM')" : "DATE_FORMAT(expense_date, '%Y-%m')";
+
+            $expensesRaw = \App\Models\Expense::selectRaw("category_id, $dateFormat as month_str, SUM(amount) as total_spent")
                 ->whereBetween('expense_date', [$minMonth, $maxMonth])
                 ->groupBy('category_id', 'month_str')
                 ->get()
