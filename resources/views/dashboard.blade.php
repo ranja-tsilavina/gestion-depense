@@ -7,32 +7,34 @@
     <!-- Page Header -->
     <div class="page-header">
         <h1><i class="bi bi-speedometer2 me-2" style="color:var(--primary)"></i>Dashboard</h1>
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="d-flex gap-2">
             <a href="/expenses/create" class="btn-add" style="background:linear-gradient(135deg,#ef4444,#dc2626)">
-                <i class="bi bi-dash-circle"></i> Nouvelle dépense
+                <i class="bi bi-dash-circle"></i>
+                <span class="d-none d-sm-inline"> Nouvelle dépense</span>
             </a>
             <a href="/revenues/create" class="btn-add" style="background:linear-gradient(135deg,#10b981,#059669)">
-                <i class="bi bi-plus-circle"></i> Nouveau revenu
+                <i class="bi bi-plus-circle"></i>
+                <span class="d-none d-sm-inline"> Nouveau revenu</span>
             </a>
         </div>
     </div>
 
     <!-- Filters -->
     <div class="card card-custom mb-4 border-0 shadow-sm" style="border-radius:16px;">
-        <div class="card-body p-4">
-            <form method="GET" action="{{ route('dashboard') }}" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label" style="font-weight:600;font-size:0.85rem;color:#64748b">Année</label>
-                    <select name="year" class="form-select" style="border-radius:12px;cursor:pointer;border:1px solid #e2e8f0;padding:0.6rem 1rem">
+        <div class="card-body p-3 p-md-4">
+            <form method="GET" action="{{ route('dashboard') }}" class="row g-2 align-items-end">
+                <div class="col-5 col-md-4">
+                    <label class="form-label" style="font-weight:600;font-size:0.8rem;color:#64748b">Année</label>
+                    <select name="year" class="form-select" style="border-radius:12px;cursor:pointer;border:1px solid #e2e8f0;padding:0.55rem 0.85rem">
                         @php $currentYearForLoop = date('Y'); @endphp
                         @for($i = $currentYearForLoop; $i >= $currentYearForLoop - 5; $i--)
                             <option value="{{ $i }}" {{ (isset($selectedYear) && $selectedYear == $i) ? 'selected' : '' }}>{{ $i }}</option>
                         @endfor
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label" style="font-weight:600;font-size:0.85rem;color:#64748b">Mois</label>
-                    <select name="month" class="form-select" style="border-radius:12px;cursor:pointer;border:1px solid #e2e8f0;padding:0.6rem 1rem">
+                <div class="col-7 col-md-4">
+                    <label class="form-label" style="font-weight:600;font-size:0.8rem;color:#64748b">Mois</label>
+                    <select name="month" class="form-select" style="border-radius:12px;cursor:pointer;border:1px solid #e2e8f0;padding:0.55rem 0.85rem">
                         <option value="">-- Toute l'année --</option>
                         @php
                             $months = [
@@ -46,7 +48,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <button type="submit" class="btn w-100" style="background:var(--primary);color:white;font-weight:600;border-radius:12px;padding:0.6rem 1rem;box-shadow:0 4px 12px rgba(79,70,229,0.2)">
                         <i class="bi bi-funnel-fill me-2"></i>Filtrer
                     </button>
@@ -80,57 +82,57 @@
 
     <!-- Stat Cards -->
     <div class="row g-3 mb-4">
-        <!-- Card 1: Total Balance (Global) -->
-        <div class="col-sm-6 col-xl-3">
-            <div class="stat-card h-100 d-flex flex-column justify-content-center" style="background:#f0f9ff;border:1px solid #bae6fd">
+        <!-- Card 1: Total Balance -->
+        <div class="col-6 col-xl-3">
+            <div class="stat-card h-100" style="background:#f0f9ff;border:1px solid #bae6fd">
                 <div class="stat-icon" style="background:#e0f2fe">
                     <i class="bi bi-bank" style="color:#0ea5e9"></i>
                 </div>
                 <div>
                     <div class="stat-label">Patrimoine Total</div>
-                    <div class="stat-value" style="color:#0369a1">{{ number_format($totalBalance ?? 0, 0, ',', ' ') }} <span style="font-size:.9rem;font-weight:500;color:#94a3b8">Ar</span></div>
+                    <div class="stat-value" style="color:#0369a1">{{ number_format($totalBalance ?? 0, 0, ',', ' ') }} <span style="font-size:.8rem;font-weight:500;color:#94a3b8">Ar</span></div>
                 </div>
             </div>
         </div>
 
         <!-- Card 2: Savings Rate -->
-        <div class="col-sm-6 col-xl-3">
-            <div class="stat-card h-100 d-flex flex-column justify-content-center" style="background:#fff7ed;border:1px solid #ffedd5">
+        <div class="col-6 col-xl-3">
+            <div class="stat-card h-100" style="background:#fff7ed;border:1px solid #ffedd5">
                 <div class="stat-icon" style="background:#ffedd5">
                     <i class="bi bi-piggy-bank" style="color:#f97316"></i>
                 </div>
-                <div>
-                    <div class="stat-label">Taux d'Épargne</div>
+                <div class="flex-grow-1">
+                    <div class="stat-label">Taux Épargne</div>
                     <div class="stat-value" style="color:#c2410c">{{ number_format($savingsRate, 1) }} %</div>
-                    <div class="progress mt-2" style="height:6px;background:#ffedd5">
+                    <div class="progress mt-2" style="height:4px;background:#ffedd5">
                         <div class="progress-bar bg-warning" role="progressbar" style="width:{{ min(100, max(0, $savingsRate)) }}%"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Card 3: Income (Month) -->
-        <div class="col-sm-6 col-xl-3">
-            <div class="stat-card card-revenue h-100 d-flex flex-column justify-content-center">
+        <!-- Card 3: Income -->
+        <div class="col-6 col-xl-3">
+            <div class="stat-card card-revenue h-100">
                 <div class="stat-icon" style="background:#dcfce7">
                     <i class="bi bi-arrow-down-circle" style="color:#16a34a"></i>
                 </div>
                 <div>
-                    <div class="stat-label">Revenus (Période)</div>
-                    <div class="stat-value">{{ number_format($totalRevenues ?? 0, 0, ',', ' ') }} <span style="font-size:.9rem;font-weight:500;color:#94a3b8">Ar</span></div>
+                    <div class="stat-label">Revenus</div>
+                    <div class="stat-value">{{ number_format($totalRevenues ?? 0, 0, ',', ' ') }} <span style="font-size:.8rem;font-weight:500;color:#94a3b8">Ar</span></div>
                 </div>
             </div>
         </div>
 
-        <!-- Card 4: Expense (Month) -->
-        <div class="col-sm-6 col-xl-3">
-            <div class="stat-card card-expense h-100 d-flex flex-column justify-content-center">
+        <!-- Card 4: Expenses -->
+        <div class="col-6 col-xl-3">
+            <div class="stat-card card-expense h-100">
                 <div class="stat-icon" style="background:#fef2f2">
                     <i class="bi bi-arrow-up-circle" style="color:#ef4444"></i>
                 </div>
                 <div>
-                    <div class="stat-label">Dépenses (Période)</div>
-                    <div class="stat-value">{{ number_format($totalExpenses ?? 0, 0, ',', ' ') }} <span style="font-size:.9rem;font-weight:500;color:#94a3b8">Ar</span></div>
+                    <div class="stat-label">Dépenses</div>
+                    <div class="stat-value">{{ number_format($totalExpenses ?? 0, 0, ',', ' ') }} <span style="font-size:.8rem;font-weight:500;color:#94a3b8">Ar</span></div>
                 </div>
             </div>
         </div>

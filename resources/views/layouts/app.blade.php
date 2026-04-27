@@ -681,18 +681,180 @@
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 998; }
         .sidebar-overlay.active { display: block; }
 
+        /* ═══════════════ RESPONSIVE MOBILE ═══════════════ */
         @media (max-width: 991.98px) {
-            .topbar { left: 0; }
+
+            /* ── Topbar ── */
+            .topbar { left: 0; padding: 0 .75rem; }
+            .topbar-greeting { display: none; }
+            .topbar-divider { display: none; }
+            .avatar-name { display: none; }
+            .avatar-caret { display: none; }
+
+            /* ── Sidebar ── */
             .sidebar { transform: translateX(-100%); transition: transform .3s; }
             .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0 !important; padding: calc(var(--topbar-height) + 1rem) 0.75rem 1rem; }
-            .page-header { padding: 1rem 1.25rem; border-radius: 0; margin: -1rem -0.75rem 1.25rem; }
-            .page-header h1 { font-size: 1.1rem; }
-            .stat-card { padding: 1.25rem; }
-            .stat-value { font-size: 1.25rem; }
-            .form-card { border-radius: 0; margin: -1rem -0.75rem; max-width: none; }
+
+            /* ── Main Content ── */
+            .main-content {
+                margin-left: 0 !important;
+                padding: calc(var(--topbar-height) + .75rem) .75rem .75rem;
+            }
+
+            /* ── Page Header ── */
+            .page-header {
+                padding: .85rem 1rem;
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                flex-wrap: nowrap;
+                gap: .5rem;
+            }
+            .page-header h1 { font-size: 1rem; font-weight: 700; }
+            .badge-count { font-size: .7rem; padding: .2rem .55rem; }
+
+            /* ── Stat Cards ── */
+            .stat-card {
+                padding: 1rem 1rem;
+                border-radius: 12px;
+                gap: .75rem;
+            }
+            .stat-icon {
+                width: 40px; height: 40px;
+                border-radius: 10px;
+                font-size: 1.1rem;
+            }
+            .stat-label { font-size: .72rem; }
+            .stat-value { font-size: 1.15rem; }
+
+            /* ── Cards ── */
+            .card-custom { border-radius: 12px; }
+            .card-header-custom { padding: 1rem 1rem; }
+            .card-header-custom h5 { font-size: .9rem; }
+
+            /* ── Table Card ── */
             .table-card { border-radius: 12px; }
-            .btn-add { padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+            .table-card-header {
+                padding: .85rem 1rem;
+                flex-wrap: wrap;
+                gap: .5rem;
+            }
+            .table-card-header h5 { font-size: .9rem; }
+
+            /* ── Data Table ── */
+            .data-table thead th {
+                font-size: .72rem;
+                padding: .7rem .85rem;
+                white-space: nowrap;
+            }
+            .data-table tbody td {
+                font-size: .82rem;
+                padding: .75rem .85rem;
+            }
+            .amount-cell { font-size: .9rem; }
+            .date-pill { font-size: .75rem; }
+            .desc-cell { max-width: 120px; }
+
+            /* ── Buttons ── */
+            .btn-add {
+                padding: .5rem .9rem;
+                font-size: .8rem;
+                border-radius: 8px;
+                gap: .3rem;
+            }
+            .btn-add i { font-size: .85rem; }
+
+            .btn-primary-custom {
+                padding: .55rem 1.1rem;
+                font-size: .85rem;
+                border-radius: 9px;
+            }
+
+            .btn-back {
+                padding: .4rem .75rem;
+                font-size: .8rem;
+            }
+
+            .btn-delete {
+                padding: .3rem .6rem;
+                font-size: .75rem;
+            }
+
+            .btn-submit {
+                padding: .8rem 1.25rem;
+                font-size: .95rem;
+                border-radius: 10px;
+            }
+
+            /* ── Form Card ── */
+            .form-card {
+                border-radius: 14px;
+                max-width: none;
+                margin: 0;
+            }
+            .form-card-header {
+                padding: 1.25rem 1.25rem;
+                gap: .75rem;
+            }
+            .form-card-icon { width: 42px; height: 42px; font-size: 1.2rem; }
+            .form-card-header h2 { font-size: 1rem; }
+            .form-card-header p { font-size: .8rem; }
+            .form-body { padding: 1.25rem; }
+            .field-group { margin-bottom: 1.1rem; }
+            .field-label { font-size: .78rem; }
+
+            /* ── Form Controls ── */
+            .form-control, .form-select {
+                padding: .65rem .85rem;
+                font-size: .88rem;
+                border-radius: 10px;
+            }
+
+            /* ── Filter Bar ── */
+            .filter-bar { padding: .75rem .85rem; }
+            .filter-bar .form-control,
+            .filter-bar .form-select {
+                font-size: .82rem;
+                padding: .5rem .75rem;
+            }
+
+            /* ── Category Pill ── */
+            .category-pill { font-size: .8rem; padding: .4rem .85rem; }
+            .cat-badge { font-size: .72rem; padding: .25rem .6rem; }
+
+            /* ── Chart Card ── */
+            .chart-card { border-radius: 12px; }
+            .chart-card-header { padding: .85rem 1rem; }
+            .chart-card-header h5 { font-size: .9rem; }
+            .chart-body { padding: 1rem; }
+
+            /* ── Legend ── */
+            .legend-item { font-size: .78rem; padding: .4rem .5rem; }
+            .legend-amount { font-size: .76rem; }
+
+            /* ── Modal ── */
+            .modal-content { border-radius: 14px; }
+            .modal-header { padding: 1rem 1.25rem; }
+            .modal-footer { padding: .75rem 1.25rem; }
+
+            /* ── Alert ── */
+            .alert-custom { font-size: .82rem; padding: .7rem 1rem; }
+
+            /* ── User Dropdown ── */
+            .user-dropdown { min-width: 200px; }
+
+            /* ── Topbar height on very small screens ── */
+            @media (max-width: 575.98px) {
+                :root { --topbar-height: 56px; }
+                .topbar-inner { padding: 0 .6rem; }
+                .sidebar-brand { font-size: .95rem; }
+                .nav-link-custom { font-size: .85rem; padding: .5rem .75rem; }
+                .page-header h1 { font-size: .9rem; }
+                .stat-value { font-size: 1rem; }
+                .stat-label { font-size: .68rem; }
+                .data-table thead th { font-size: .68rem; padding: .6rem .65rem; }
+                .data-table tbody td { font-size: .78rem; padding: .65rem .65rem; }
+                .btn-add { font-size: .75rem; padding: .45rem .7rem; }
+            }
         }
 
         /* Utility for responsive tables */
