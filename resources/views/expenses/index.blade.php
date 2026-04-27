@@ -14,7 +14,8 @@
     <div class="page-header">
         <h1><i class="bi bi-receipt-cutoff me-2" style="color:var(--primary)"></i>Mes Dépenses</h1>
         <a href="/expenses/create" class="btn-add">
-            <i class="bi bi-plus-lg"></i> Nouvelle dépense
+            <i class="bi bi-plus-lg"></i>
+            <span class="d-none d-sm-inline"> Nouvelle dépense</span>
         </a>
     </div>
 
@@ -107,36 +108,36 @@
 
     <!-- ── Stat Cards ── -->
     <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-xl-4">
+        <div class="col-6 col-xl-4">
             <div class="stat-card card-total">
                 <div class="stat-icon" style="background:#ede9fe">
                     <i class="bi bi-cash-coin" style="color:var(--primary)"></i>
                 </div>
                 <div>
                     <div class="stat-label">Total dépensé</div>
-                    <div class="stat-value">{{ number_format($total, 0, ',', ' ') }} <span style="font-size:.9rem;font-weight:500;color:#94a3b8">Ar</span></div>
+                    <div class="stat-value">{{ number_format($total, 0, ',', ' ') }} <span style="font-size:.8rem;font-weight:500;color:#94a3b8">Ar</span></div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-4">
+        <div class="col-6 col-xl-4">
             <div class="stat-card card-count">
                 <div class="stat-icon" style="background:#dcfce7">
                     <i class="bi bi-list-check" style="color:#16a34a"></i>
                 </div>
                 <div>
-                    <div class="stat-label">Nombre de dépenses</div>
+                    <div class="stat-label">Nombre</div>
                     <div class="stat-value">{{ $count }}</div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-4">
+        <div class="col-12 col-xl-4">
             <div class="stat-card card-avg">
                 <div class="stat-icon" style="background:#fef3c7">
                     <i class="bi bi-bar-chart-line" style="color:#d97706"></i>
                 </div>
                 <div>
-                    <div class="stat-label">Dépense moyenne</div>
-                    <div class="stat-value">{{ number_format($average, 0, ',', ' ') }} <span style="font-size:.9rem;font-weight:500;color:#94a3b8">Ar</span></div>
+                    <div class="stat-label">Moyenne</div>
+                    <div class="stat-value">{{ number_format($average, 0, ',', ' ') }} <span style="font-size:.8rem;font-weight:500;color:#94a3b8">Ar</span></div>
                 </div>
             </div>
         </div>
@@ -226,7 +227,7 @@
             <table class="table data-table" id="expenseTable">
                 <thead>
                     <tr>
-                        <th class="sort-th" data-col="0" data-type="num" title="Trier par ID">
+                        <th class="sort-th d-none d-md-table-cell" data-col="0" data-type="num" title="Trier par ID">
                             #
                             <span class="sort-icon"><i class="bi bi-caret-up-fill ci-up"></i><i class="bi bi-caret-down-fill ci-down"></i></span>
                         </th>
@@ -238,7 +239,7 @@
                             Montant
                             <span class="sort-icon"><i class="bi bi-caret-up-fill ci-up"></i><i class="bi bi-caret-down-fill ci-down"></i></span>
                         </th>
-                        <th class="sort-th" data-col="3" data-type="str" title="Trier par description">
+                        <th class="sort-th d-none d-lg-table-cell" data-col="3" data-type="str" title="Trier par description">
                             Description
                             <span class="sort-icon"><i class="bi bi-caret-up-fill ci-up"></i><i class="bi bi-caret-down-fill ci-down"></i></span>
                         </th>
@@ -246,14 +247,14 @@
                             Date
                             <span class="sort-icon"><i class="bi bi-caret-up-fill ci-up"></i><i class="bi bi-caret-down-fill ci-down"></i></span>
                         </th>
-                        <th>Créé par</th>
+                        <th class="d-none d-md-table-cell">Créé par</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody id="expenseBody">
                     @forelse($expenses as $expense)
                     <tr class="table-row-animate" data-id="{{ $expense->id }}">
-                        <td><span class="id-chip">{{ $expense->id }}</span></td>
+                        <td class="d-none d-md-table-cell"><span class="id-chip">{{ $expense->id }}</span></td>
                         <td>
                             <span class="cat-badge">
                                 <i class="bi bi-tag-fill"></i>
@@ -264,7 +265,7 @@
                             {{ number_format($expense->amount, 0, ',', ' ') }}
                             <span class="amount-currency">Ar</span>
                         </td>
-                        <td>
+                        <td class="d-none d-lg-table-cell">
                             <span class="desc-cell d-block" title="{{ $expense->description }}">
                                 {{ $expense->description ?: '—' }}
                             </span>
@@ -275,7 +276,7 @@
                                 {{ \Carbon\Carbon::parse($expense->expense_date)->format('d/m/Y') }}
                             </span>
                         </td>
-                        <td>
+                        <td class="d-none d-md-table-cell">
                             <div class="d-flex align-items-center gap-1">
                                 <div class="avatar-circle" style="width:22px;height:22px;font-size:.6rem;flex-shrink:0;">
                                     {{ strtoupper(substr($expense->creator->name ?? '?', 0, 1)) }}
@@ -288,7 +289,8 @@
                                 class="btn-delete"
                                 onclick="confirmDelete({{ $expense->id }}, '{{ addslashes($expense->description ?: 'cette dépense') }}')"
                                 title="Supprimer">
-                                <i class="bi bi-trash3"></i> Supprimer
+                                <i class="bi bi-trash3"></i>
+                                <span class="d-none d-sm-inline"> Supprimer</span>
                             </button>
                         </td>
                     </tr>
