@@ -1,0 +1,51 @@
+{
+    "name": "VolaKo - Gestion de Budget",
+    "short_name": "VolaKo",
+    "description": "Gérez votre budget facilement avec VolaKo, même hors ligne.",
+    "start_url": "/dashboard",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "theme_color": "#6366f1",
+    "background_color": "#f8fafc",
+    "lang": "fr",
+    "categories": ["finance", "productivity"],
+    "icons": [
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Ajouter une dépense",
+            "short_name": "Dépense",
+            "description": "Enregistrer une nouvelle dépense rapidement",
+            "url": "/expenses/create",
+            "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Tableau de bord",
+            "short_name": "Dashboard",
+            "description": "Voir le tableau de bord",
+            "url": "/dashboard",
+            "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Mes dépenses",
+            "short_name": "Dépenses",
+            "description": "Liste de toutes les dépenses",
+            "url": "/expenses",
+            "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+        }
+    ],
+    "screenshots": []
+}

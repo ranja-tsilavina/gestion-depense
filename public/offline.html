@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hors ligne – BudgetFamille</title>
+<link rel="manifest" href="/manifest.json">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,system-ui,sans-serif;background:linear-gradient(135deg,#f0f4ff,#f8fafc);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.card{background:#fff;border-radius:28px;padding:3rem 2rem 2.5rem;text-align:center;max-width:400px;width:100%;box-shadow:0 12px 48px rgba(99,102,241,.12)}
+.wifi-icon{width:88px;height:88px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.75rem;font-size:2.5rem}
+h1{color:#1e1b4b;font-size:1.5rem;font-weight:700;margin-bottom:.75rem}
+p{color:#64748b;font-size:.92rem;line-height:1.7}
+.actions{display:flex;flex-direction:column;gap:.75rem;margin-top:2rem}
+.btn-p{display:flex;align-items:center;justify-content:center;gap:.5rem;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;padding:.85rem 2rem;border-radius:50px;font-weight:700;font-size:.95rem;border:none;cursor:pointer;text-decoration:none}
+.btn-s{display:flex;align-items:center;justify-content:center;gap:.5rem;background:#f1f5f9;color:#475569;padding:.75rem 2rem;border-radius:50px;font-weight:600;font-size:.9rem;border:none;cursor:pointer;text-decoration:none}
+.status{margin-top:2rem;padding-top:1.5rem;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:.82rem;color:#94a3b8}
+.dot{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.queue-info{margin-top:1rem;padding:.75rem 1rem;background:#fef3c7;border-radius:12px;font-size:.82rem;color:#92400e;display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="wifi-icon">📡</div>
+  <h1>Vous êtes hors ligne</h1>
+  <p>Vérifiez votre connexion. Vos dépenses en attente seront synchronisées automatiquement.</p>
+  <div class="queue-info" id="queueInfo"></div>
+  <div class="actions">
+    <button class="btn-p" onclick="window.location.reload()">↺ Réessayer</button>
+    <a href="/expenses/create" class="btn-s">✏️ Ajouter une dépense hors ligne</a>
+  </div>
+  <div class="status">
+    <div class="dot" id="dot"></div>
+    <span id="statusText">Hors ligne…</span>
+  </div>
+</div>
+<script>
+function checkOnline(){
+  if(navigator.onLine){
+    document.getElementById('dot').style.background='#10b981';
+    document.getElementById('statusText').textContent='Connexion rétablie! Redirection…';
+    setTimeout(()=>window.location.replace('/dashboard'),1200);
+  }
+}
+window.addEventListener('online',checkOnline);
+setInterval(checkOnline,3000);
+(async()=>{
+  try{
+    const r=indexedDB.open('budgetfamille_db',2);
+    r.onsuccess=()=>{
+      const db=r.result;
+      if(!db.objectStoreNames.contains('offline_queue'))return;
+      const c=db.transaction('offline_queue','readonly').objectStore('offline_queue').count();
+      c.onsuccess=()=>{if(c.result>0){const el=document.getElementById('queueInfo');el.textContent='📥 '+c.result+' dépense(s) en attente';el.style.display='block';}};
+    };
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Budgets – Gestion de Dépenses')
+@section('title', 'Budgets – VolaKo')
 
 @section('content')
 
@@ -8,7 +8,7 @@
     <div class="page-header">
         <h1><i class="bi bi-wallet me-2" style="color:var(--primary)"></i>Mes Budgets</h1>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge-count">{{ $budgets->count() }} budget(s)</span>
+            <span class="badge rounded-pill px-3 py-2" style="background:#ede9fe; color:var(--primary)">{{ $budgets->count() }} budget(s)</span>
             @can('create', App\Models\Budget::class)
             <a href="/budgets/create" class="btn-add">
                 <i class="bi bi-plus-lg"></i> Nouveau budget

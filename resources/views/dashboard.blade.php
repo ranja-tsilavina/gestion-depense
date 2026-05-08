@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard – Gestion de Dépenses')
+@section('title', 'Dashboard – VolaKo')
 
 @section('content')
 
@@ -82,7 +82,6 @@
 
     <!-- Stat Cards -->
     <div class="row g-3 mb-4">
-        <!-- Card 1: Total Balance -->
         <div class="col-6 col-xl-3">
             <div class="stat-card h-100" style="background:#f0f9ff;border:1px solid #bae6fd">
                 <div class="stat-icon" style="background:#e0f2fe">
@@ -95,7 +94,6 @@
             </div>
         </div>
 
-        <!-- Card 2: Savings Rate -->
         <div class="col-6 col-xl-3">
             <div class="stat-card h-100" style="background:#fff7ed;border:1px solid #ffedd5">
                 <div class="stat-icon" style="background:#ffedd5">
@@ -103,15 +101,14 @@
                 </div>
                 <div class="flex-grow-1">
                     <div class="stat-label">Taux Épargne</div>
-                    <div class="stat-value" style="color:#c2410c">{{ number_format($savingsRate, 1) }} %</div>
+                    <div class="stat-value" style="color:#c2410c">{{ number_format($savingsRate ?? 0, 1) }} %</div>
                     <div class="progress mt-2" style="height:4px;background:#ffedd5">
-                        <div class="progress-bar bg-warning" role="progressbar" style="width:{{ min(100, max(0, $savingsRate)) }}%"></div>
+                        <div class="progress-bar bg-warning" role="progressbar" style="width:{{ min(100, max(0, $savingsRate ?? 0)) }}%"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Card 3: Income -->
         <div class="col-6 col-xl-3">
             <div class="stat-card card-revenue h-100">
                 <div class="stat-icon" style="background:#dcfce7">
@@ -124,7 +121,6 @@
             </div>
         </div>
 
-        <!-- Card 4: Expenses -->
         <div class="col-6 col-xl-3">
             <div class="stat-card card-expense h-100">
                 <div class="stat-icon" style="background:#fef2f2">
@@ -211,29 +207,26 @@
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.color = '#64748b';
 
-    // Bar Chart - Expenses vs Budget
     new Chart(document.getElementById('expensesBudgetChart'), {
         type: 'bar',
         data: {
-            labels: @json($chartCategoryLabels),
+            labels: {!! json_encode($chartCategoryLabels) !!},
             datasets: [
                 {
                     label: 'Dépenses',
-                    data: @json($chartExpenseValues),
+                    data: {!! json_encode($chartExpenseValues) !!},
                     backgroundColor: 'rgba(239,68,68,0.7)',
                     borderColor: 'rgba(239,68,68,1)',
                     borderWidth: 1.5,
                     borderRadius: 8,
-                    borderSkipped: false,
                 },
                 {
                     label: 'Budget',
-                    data: @json($chartBudgetValues),
+                    data: {!! json_encode($chartBudgetValues) !!},
                     backgroundColor: 'rgba(99,102,241,0.35)',
                     borderColor: 'rgba(99,102,241,1)',
                     borderWidth: 1.5,
                     borderRadius: 8,
-                    borderSkipped: false,
                 }
             ]
         },
@@ -258,13 +251,12 @@
         }
     });
 
-    // Doughnut Chart - Expense Distribution
     new Chart(document.getElementById('expenseDistributionChart'), {
         type: 'doughnut',
         data: {
-            labels: @json($chartCategoryLabels),
+            labels: {!! json_encode($chartCategoryLabels) !!},
             datasets: [{
-                data: @json($chartExpenseValues),
+                data: {!! json_encode($chartExpenseValues) !!},
                 backgroundColor: ['#6366f1','#f97316','#10b981','#eab308','#ef4444','#3b82f6','#8b5cf6'],
                 borderWidth: 2,
                 borderColor: '#fff',

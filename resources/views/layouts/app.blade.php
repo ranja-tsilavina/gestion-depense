@@ -2,13 +2,28 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Gestion de Dépenses')</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>@yield('title', 'VolaKo')</title>
+    
+    {{-- PWA Core --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#4547DD">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VolaKo">
+    <meta name="description" content="Gérez votre budget facilement avec VolaKo, même hors ligne.">
+    <link rel="manifest" href="/manifest.jsonz">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+
+    {{-- Assets --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <style>
         :root {
             --primary: #6366f1;
@@ -16,8 +31,14 @@
             --secondary: #f1f5f9;
             --accent: #10b981;
             --danger: #ef4444;
-            --sidebar-width: 240px;
-            --topbar-height: 62px;
+            --sidebar-width: 260px;
+            --topbar-height: 64px;
+            --card-radius: 20px;
+            --input-radius: 14px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+            --shadow-md: 0 4px 20px rgba(0,0,0,.04);
+            --bg-color: #f8fafc;
+            --sidebar-bg: linear-gradient(160deg, #1e1b4b 0%, #312e81 100%);
         }
 
         * { font-family: 'Inter', sans-serif; }

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Mes Dépenses – Gestion de Dépenses')
+@section('title', 'Mes Dépenses – VolaKo')
 
 @section('content')
 
@@ -10,29 +10,26 @@
         $average = $count > 0 ? round($total / $count, 0) : 0;
     @endphp
 
-    <!-- ── Page Header ── -->
+    <!-- Page Header -->
     <div class="page-header">
         <h1><i class="bi bi-receipt-cutoff me-2" style="color:var(--primary)"></i>Mes Dépenses</h1>
-        <a href="/expenses/create" class="btn-add">
-            <i class="bi bi-plus-lg"></i>
-            <span class="d-none d-sm-inline"> Nouvelle dépense</span>
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('expenses.export.pdf', request()->query()) }}" class="btn btn-sm" style="background:#fef2f2;color:#ef4444;border:1px solid #fecaca;border-radius:8px;font-weight:600" title="Exporter en PDF">
+                <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+            </a>
+            <a href="{{ route('expenses.export.excel', request()->query()) }}" class="btn btn-sm" style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:8px;font-weight:600" title="Exporter en Excel">
+                <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
+            </a>
+            <a href="/expenses/create" class="btn-add">
+                <i class="bi bi-plus-lg"></i>
+                <span class="d-none d-sm-inline"> Nouvelle dépense</span>
+            </a>
+        </div>
     </div>
 
-    <!-- ── Filters ── -->
+    <!-- Filters -->
     <div class="card card-custom mb-4 border-0 shadow-sm" style="border-radius:16px;">
         <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-                <h5 class="text-secondary mb-0" style="font-size:1rem;font-weight:600"><i class="bi bi-funnel-fill me-2"></i>Recherche avancée</h5>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('expenses.export.pdf', request()->query()) }}" class="btn btn-sm" style="background:#fef2f2;color:#ef4444;border:1px solid #fecaca;border-radius:8px;font-weight:600" title="Exporter en PDF">
-                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
-                    </a>
-                    <a href="{{ route('expenses.export.excel', request()->query()) }}" class="btn btn-sm" style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:8px;font-weight:600" title="Exporter en Excel">
-                        <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
-                    </a>
-                </div>
-            </div>
             <form method="GET" action="{{ route('expenses.index') }}" class="row g-3">
                 <div class="col-md-2">
                     <label class="form-label" style="font-weight:600;font-size:0.75rem;color:#64748b;text-transform:uppercase">Année</label>
@@ -40,7 +37,7 @@
                         <option value="">Toutes</option>
                         @php $currentYearForLoop = date('Y'); @endphp
                         @for($i = $currentYearForLoop; $i >= $currentYearForLoop - 5; $i--)
-                            <option value="{{ $i }}" {{ (isset($selectedYear) && $selectedYear != '' && $selectedYear == $i) ? 'selected' : '' }}>{{ $i }}</option>
+                            <option value="{{ $i }}" {{ (isset($selectedYear) && $selectedYear == $i) ? 'selected' : '' }}>{{ $i }}</option>
                         @endfor
                     </select>
                 </div>
@@ -96,7 +93,7 @@
         </div>
     </div>
 
-    <!-- ── Budget Alerts ── -->
+    <!-- Budget Alerts -->
     @if(!empty($alertes) && count($alertes) > 0)
         @foreach($alertes as $alerte)
         <div class="alert alert-danger alert-custom alert-dismissible fade show mb-3" role="alert">
@@ -106,7 +103,7 @@
         @endforeach
     @endif
 
-    <!-- ── Stat Cards ── -->
+    <!-- Stat Cards -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-xl-4">
             <div class="stat-card card-total">
@@ -143,10 +140,8 @@
         </div>
     </div>
 
-    <!-- ── Charts ── -->
+    <!-- Charts -->
     <div class="row g-4 mb-4">
-
-        <!-- Monthly Bar Chart -->
         <div class="col-lg-7">
             <div class="chart-card h-100">
                 <div class="chart-card-header">
@@ -166,7 +161,6 @@
             </div>
         </div>
 
-        <!-- Category Doughnut + Legend -->
         <div class="col-lg-5">
             <div class="chart-card h-100">
                 <div class="chart-card-header">
@@ -209,12 +203,9 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- Removed Old Search Bar -->
-
-    <!-- ── Expenses Table ── -->
+    <!-- Expenses Table -->
     <div class="table-card">
         <div class="table-card-header">
             <h5><i class="bi bi-table me-2" style="color:var(--primary)"></i>Liste des dépenses</h5>
@@ -227,26 +218,11 @@
             <table class="table data-table" id="expenseTable">
                 <thead>
                     <tr>
-                        <th class="sort-th d-none d-md-table-cell" data-col="0" data-type="num" title="Trier par ID">
-                            #
-                            <span class="sort-icon"><i class="bi bi-caret-up-fill ci-up"></i><i class="bi bi-caret-down-fill ci-down"></i></span>
-                        </th>
-                        <th class="sort-th" data-col="1" data-type="str" title="Trier par catégorie">
-                            Catégorie
-                            <span class="sort-icon"><i class="bi bi-caret-up-fill ci-up"></i><i class="bi bi-caret-down-fill ci-down"></i></span>
-                        </th>
-                        <th class="sort-th" data-col="2" data-type="num" title="Trier par montant">
-                            Montant
-                            <span class="sort-icon"><i class="bi bi-caret-up-fill ci-up"></i><i class="bi bi-caret-down-fill ci-down"></i></span>
-                        </th>
-                        <th class="sort-th d-none d-lg-table-cell" data-col="3" data-type="str" title="Trier par description">
-                            Description
-                            <span class="sort-icon"><i class="bi bi-caret-up-fill ci-up"></i><i class="bi bi-caret-down-fill ci-down"></i></span>
-                        </th>
-                        <th class="sort-th" data-col="4" data-type="date" title="Trier par date">
-                            Date
-                            <span class="sort-icon"><i class="bi bi-caret-up-fill ci-up"></i><i class="bi bi-caret-down-fill ci-down"></i></span>
-                        </th>
+                        <th class="sort-th d-none d-md-table-cell" data-col="0" data-type="num">#</th>
+                        <th class="sort-th" data-col="1" data-type="str">Catégorie</th>
+                        <th class="sort-th" data-col="2" data-type="num">Montant</th>
+                        <th class="sort-th d-none d-lg-table-cell" data-col="3" data-type="str">Description</th>
+                        <th class="sort-th" data-col="4" data-type="date">Date</th>
                         <th class="d-none d-md-table-cell">Créé par</th>
                         <th class="text-center">Action</th>
                     </tr>
@@ -285,23 +261,18 @@
                             </div>
                         </td>
                         <td class="text-center">
-                            <button
-                                class="btn-delete"
-                                onclick="confirmDelete({{ $expense->id }}, '{{ addslashes($expense->description ?: 'cette dépense') }}')"
-                                title="Supprimer">
+                            <button class="btn-delete" onclick="confirmDelete({{ $expense->id }}, '{{ addslashes($expense->description ?: 'cette dépense') }}')">
                                 <i class="bi bi-trash3"></i>
                                 <span class="d-none d-sm-inline"> Supprimer</span>
                             </button>
                         </td>
                     </tr>
                     @empty
-                    <tr id="emptyRow">
-                        <td colspan="6">
+                    <tr>
+                        <td colspan="7">
                             <div class="empty-state">
                                 <i class="bi bi-inbox"></i>
-                                <p>Aucune dépense enregistrée.<br>
-                                    <a href="/expenses/create" style="color:var(--primary);font-weight:600">Ajouter votre première dépense →</a>
-                                </p>
+                                <p>Aucune dépense enregistrée.</p>
                             </div>
                         </td>
                     </tr>
@@ -314,39 +285,25 @@
                 {{ $expenses->links('pagination::bootstrap-5') }}
             </div>
         @endif
-
-        <!-- No results row (injected by JS) -->
-        <div id="noResults" class="empty-state" style="display:none">
-            <i class="bi bi-search"></i>
-            <p>Aucun résultat pour votre recherche.</p>
-        </div>
     </div>
 
-<!-- ═══════════════ DELETE CONFIRM MODAL ═══════════════ -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="deleteModalLabel">
-                    <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Confirmer la suppression
-                </h5>
+                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Confirmer</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" style="font-size:.9rem;color:#475569;padding:1.25rem 1.5rem">
+            <div class="modal-body">
                 Voulez-vous vraiment supprimer <strong id="deleteItemName"></strong> ?
-                <br><small class="text-muted">Cette action est irréversible.</small>
             </div>
-            <div class="modal-footer" style="gap:.5rem">
-                <button type="button" class="btn" data-bs-dismiss="modal"
-                    style="border:1.5px solid #e2e8f0;border-radius:9px;font-weight:500;font-size:.875rem;padding:.55rem 1.1rem">
-                    Annuler
-                </button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
                 <form id="deleteForm" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn-danger-custom">
-                        <i class="bi bi-trash3 me-1"></i>Supprimer
-                    </button>
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
                 </form>
             </div>
         </div>
@@ -357,31 +314,20 @@
 
 @push('scripts')
 <script>
-    // ── Delete modal ──
     function confirmDelete(id, name) {
         document.getElementById('deleteItemName').textContent = '"' + name + '"';
         document.getElementById('deleteForm').action = '/expenses/' + id;
         new bootstrap.Modal(document.getElementById('deleteModal')).show();
     }
 
-    // ═══════════════ CHART.JS ═══════════════
-
-    const PALETTE = [
-        '#6366f1','#f97316','#10b981','#eab308','#ef4444',
-        '#3b82f6','#8b5cf6','#06b6d4','#ec4899','#14b8a6',
-        '#f43f5e','#a855f7','#22c55e','#0ea5e9','#fb923c'
-    ];
-
+    const PALETTE = ['#6366f1','#f97316','#10b981','#eab308','#ef4444','#3b82f6','#8b5cf6'];
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.color = '#64748b';
 
-    // ── Monthly Bar Chart ──
     const monthlyCanvas = document.getElementById('monthlyChart');
     if (monthlyCanvas) {
-        const monthlyLabels = @json($monthlyLabels);
-        const monthlyTotals = @json($monthlyTotals);
-        const maxVal = Math.max(...monthlyTotals);
-
+        const monthlyLabels = {!! json_encode($monthlyLabels) !!};
+        const monthlyTotals = {!! json_encode($monthlyTotals) !!};
         new Chart(monthlyCanvas, {
             type: 'bar',
             data: {
@@ -389,165 +335,35 @@
                 datasets: [{
                     label: 'Dépenses (Ar)',
                     data: monthlyTotals,
-                    backgroundColor: monthlyTotals.map(v =>
-                        v === maxVal ? 'rgba(99,102,241,1)' : 'rgba(99,102,241,0.35)'
-                    ),
-                    borderColor: monthlyTotals.map(v =>
-                        v === maxVal ? '#4f46e5' : 'rgba(99,102,241,0.6)'
-                    ),
+                    backgroundColor: 'rgba(99,102,241,0.35)',
+                    borderColor: '#6366f1',
                     borderWidth: 1.5,
                     borderRadius: 8,
-                    borderSkipped: false,
                 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ' ' + parseInt(ctx.parsed.y).toLocaleString('fr-FR') + ' Ar'
-                        },
-                        backgroundColor: '#1e1b4b', padding: 10, cornerRadius: 10,
-                    }
-                },
-                scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-                    y: {
-                        grid: { color: '#f1f5f9' },
-                        ticks: { font: { size: 11 }, callback: v => parseInt(v).toLocaleString('fr-FR') },
-                        beginAtZero: true,
-                    }
-                }
             }
         });
     }
 
-    // ── Category Doughnut Chart ──
     const categoryCanvas = document.getElementById('categoryChart');
     if (categoryCanvas) {
-        const catLabels = @json($categoryLabels);
-        const catTotals = @json($categoryTotals);
-        const colors    = catLabels.map((_, i) => PALETTE[i % PALETTE.length]);
-
+        const catLabels = {!! json_encode($categoryLabels) !!};
+        const catTotals = {!! json_encode($categoryTotals) !!};
         catLabels.forEach((_, i) => {
             const dot = document.getElementById('dot-' + i);
-            if (dot) dot.style.background = colors[i];
+            if (dot) dot.style.background = PALETTE[i % PALETTE.length];
         });
-
         new Chart(categoryCanvas, {
             type: 'doughnut',
             data: {
                 labels: catLabels,
                 datasets: [{
                     data: catTotals,
-                    backgroundColor: colors,
+                    backgroundColor: PALETTE,
                     borderWidth: 2,
                     borderColor: '#fff',
-                    hoverOffset: 8,
                 }]
-            },
-            options: {
-                responsive: true,
-                cutout: '68%',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ' ' + parseInt(ctx.parsed).toLocaleString('fr-FR') + ' Ar'
-                        },
-                        backgroundColor: '#1e1b4b', padding: 10, cornerRadius: 10,
-                    }
-                }
             }
         });
     }
-
-    // Search and filter functions removed since advanced search backend is now used
-
-
-
-    // ── Column sorting ──
-    (function () {
-        const tbody   = document.getElementById('expenseBody');
-        const headers = document.querySelectorAll('th.sort-th');
-        const state = {};
-
-        function cellValue(row, col, type) {
-            const cell = row.cells[col];
-            if (!cell) return '';
-            const raw = cell.textContent.trim();
-
-            if (type === 'num') {
-                const cleaned = raw.replace(/[^\d.,-]/g, '').replace(/\s/g,'').replace(',','.');
-                const n = parseFloat(cleaned);
-                return isNaN(n) ? 0 : n;
-            }
-            if (type === 'date') {
-                const parts = raw.split('/');
-                if (parts.length === 3) {
-                    return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
-                }
-                return 0;
-            }
-            return raw.toLowerCase();
-        }
-
-        function updateHeaders(activeCol, dir) {
-            headers.forEach(th => {
-                const col = parseInt(th.dataset.col);
-                th.classList.remove('active', 'sort-asc', 'sort-desc');
-                if (col === activeCol) {
-                    th.classList.add('active', dir === 'asc' ? 'sort-asc' : 'sort-desc');
-                }
-            });
-        }
-
-        function animateRows() {
-            const rows = tbody.querySelectorAll('tr[data-id]');
-            rows.forEach((row, i) => {
-                row.style.opacity = '0';
-                row.style.transform = 'translateY(6px)';
-                setTimeout(() => {
-                    row.style.transition = 'opacity .2s ease, transform .2s ease';
-                    row.style.opacity = '1';
-                    row.style.transform = 'translateY(0)';
-                }, i * 18);
-            });
-        }
-
-        function doSort(colIndex, type) {
-            const rows = Array.from(tbody.querySelectorAll('tr[data-id]'));
-            if (rows.length === 0) return;
-
-            const prev = state[colIndex];
-            const dir  = prev === 'asc' ? 'desc' : 'asc';
-            Object.keys(state).forEach(k => delete state[k]);
-            state[colIndex] = dir;
-
-            rows.sort((a, b) => {
-                const aVal = cellValue(a, colIndex, type);
-                const bVal = cellValue(b, colIndex, type);
-
-                if (typeof aVal === 'number') {
-                    return dir === 'asc' ? aVal - bVal : bVal - aVal;
-                }
-                return dir === 'asc'
-                    ? aVal.localeCompare(bVal, 'fr', { sensitivity: 'base' })
-                    : bVal.localeCompare(aVal, 'fr', { sensitivity: 'base' });
-            });
-
-            rows.forEach(r => tbody.appendChild(r));
-            updateHeaders(colIndex, dir);
-            animateRows();
-        }
-
-        headers.forEach(th => {
-            th.addEventListener('click', () => {
-                doSort(parseInt(th.dataset.col), th.dataset.type);
-            });
-        });
-    })();
 </script>
 @endpush

@@ -133,4 +133,3 @@
 
 {{-- Sidebar overlay (mobile) --}}
 <div class="sidebar-overlay" :class="{ 'active': sidebarOpen }" @click="sidebarOpen = false"></div>
-

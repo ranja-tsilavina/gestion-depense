@@ -1,30 +1,29 @@
 @extends('layouts.app')
 
-@section('title', 'Journal d\'Activité – FintechApp')
+@section('title', 'Journal d\'Activité – VolaKo')
 
 @section('content')
 <div class="page-header">
     <h1><i class="bi bi-activity me-2" style="color:var(--primary)"></i>Journal d'Activité</h1>
-    <span class="badge-count">{{ $activities->total() }} entrées</span>
+    <span class="badge rounded-pill px-3 py-2" style="background:#ede9fe; color:var(--primary)">{{ $activities->total() }} entrées</span>
 </div>
 
 @if(session('error'))
-    <div class="alert-custom alert alert-danger mb-3">
+    <div class="alert alert-danger mb-3" style="border-radius:12px">
         <i class="bi bi-exclamation-circle me-2"></i>{{ session('error') }}
     </div>
 @endif
 
-<div class="table-card">
+<div class="card-custom border-0 shadow-sm bg-white overflow-hidden" style="border-radius:16px">
     @if($activities->isEmpty())
-        <div class="empty-state">
-            <i class="bi bi-clock-history"></i>
+        <div class="p-5 text-center text-muted">
+            <i class="bi bi-clock-history d-block mb-2" style="font-size:2rem"></i>
             <p class="mb-0">Aucune activité enregistrée pour ce foyer.</p>
         </div>
     @else
-        {{-- Timeline --}}
         <div class="p-3 p-md-4">
             <div class="position-relative" style="padding-left: 2.5rem;">
-                {{-- Vertical line --}}
+                
                 <div style="position:absolute;left:0.9rem;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#6366f1 0%,#e2e8f0 100%);border-radius:2px;"></div>
 
                 @foreach($activities as $activity)
@@ -37,16 +36,15 @@
                         $style = $icons[$activity->action] ?? ['icon'=>'bi-circle','color'=>'#94a3b8','bg'=>'#f8fafc'];
                     @endphp
                     <div class="d-flex align-items-start mb-4 position-relative">
-                        {{-- Icon bubble --}}
+                        
                         <div class="position-absolute" style="left:-2.5rem;top:2px;">
                             <div style="width:2rem;height:2rem;border-radius:50%;background:{{ $style['bg'] }};border:2px solid {{ $style['color'] }};display:flex;align-items:center;justify-content:center;">
                                 <i class="bi {{ $style['icon'] }}" style="color:{{ $style['color'] }};font-size:.75rem;"></i>
                             </div>
                         </div>
 
-                        {{-- Content --}}
                         <div class="flex-grow-1 ms-1">
-                            <div class="card border-0 shadow-sm" style="border-radius:12px;">
+                            <div class="card border-0 shadow-sm" style="border-radius:12px; background:#f8fafc">
                                 <div class="card-body py-3 px-3">
                                     <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
                                         <div>
@@ -72,7 +70,6 @@
                 @endforeach
             </div>
 
-            {{-- Pagination --}}
             <div class="d-flex justify-content-center mt-3">
                 {{ $activities->links() }}
             </div>

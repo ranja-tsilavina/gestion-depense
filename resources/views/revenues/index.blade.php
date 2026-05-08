@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Revenus – Gestion de Dépenses')
+@section('title', 'Revenus – VolaKo')
 
 @section('content')
 
@@ -8,7 +8,7 @@
     <div class="page-header">
         <h1><i class="bi bi-plus-circle me-2" style="color:var(--accent)"></i>Mes Revenus</h1>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge-count" style="background:var(--accent)">{{ $revenues->count() }} revenu(s)</span>
+            <span class="badge rounded-pill px-3 py-2" style="background:var(--accent); color:white">{{ $revenues->count() }} revenu(s)</span>
             <a href="/revenues/create" class="btn-add" style="background:linear-gradient(135deg,#10b981,#059669)">
                 <i class="bi bi-plus-lg"></i> Nouveau revenu
             </a>
@@ -36,7 +36,7 @@
                         <option value="">Toutes</option>
                         @php $currentYearForLoop = date('Y'); @endphp
                         @for($i = $currentYearForLoop; $i >= $currentYearForLoop - 5; $i--)
-                            <option value="{{ $i }}" {{ (isset($selectedYear) && $selectedYear != '' && $selectedYear == $i) ? 'selected' : '' }}>{{ $i }}</option>
+                            <option value="{{ $i }}" {{ (isset($selectedYear) && $selectedYear == $i) ? 'selected' : '' }}>{{ $i }}</option>
                         @endfor
                     </select>
                 </div>
@@ -83,14 +83,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-custom alert-dismissible fade show mb-3" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    <!-- Stat Cards -->
     @php
         $totalRevenue = $revenues->sum('amount');
         $revCount = $revenues->count();
@@ -180,12 +172,10 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6">
+                        <td colspan="7">
                             <div class="empty-state">
                                 <i class="bi bi-cash-coin"></i>
-                                <p>Aucun revenu enregistré.<br>
-                                    <a href="/revenues/create" style="color:var(--accent);font-weight:600">Ajouter votre premier revenu →</a>
-                                </p>
+                                <p>Aucun revenu enregistré.</p>
                             </div>
                         </td>
                     </tr>

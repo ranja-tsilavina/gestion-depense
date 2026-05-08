@@ -2,7 +2,7 @@
 <aside class="sidebar" id="sidebar" :class="{ 'open': sidebarOpen }">
     <a href="/dashboard" class="sidebar-brand">
         <span class="brand-icon"><i class="bi bi-wallet2 text-white"></i></span>
-        FintechApp
+        VolaKo
     </a>
     <div class="px-3 mb-3 text-center">
         <small class="text-white-50 text-uppercase fw-bold" style="font-size:0.65rem">Ma Maison Actuelle</small>
